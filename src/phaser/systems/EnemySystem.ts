@@ -162,7 +162,10 @@ export class EnemySystem {
           break;
         }
         case "chase": {
-          this.moveTo(enemy, px + (enemy.sprite.x - ex), py + (enemy.sprite.y - ey), cfg.speed);
+          const offX = enemy.sprite.x - ex;
+          const offY = enemy.sprite.y - ey;
+          const step = this.chaseStep(enemy, ex, ey, px, py, now);
+          this.moveTo(enemy, step.x + offX, step.y + offY, cfg.speed);
           break;
         }
         case "return": {
