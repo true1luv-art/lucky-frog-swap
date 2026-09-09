@@ -207,6 +207,8 @@ export class FarmScene extends Phaser.Scene {
 
     const wantsAttack = this.input_.consumeAttack();
     if (!wantsAttack || this._respawning) return;
+    // The bow must be equipped before it can be aimed or fired.
+    if (!this._isBowEquipped()) return;
 
     const stats = getBowStats(this._readBowTier());
     const now = this.time.now;
@@ -225,8 +227,26 @@ export class FarmScene extends Phaser.Scene {
     const ox = facing === "left" ? -nudge : facing === "right" ? nudge : 0;
     const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
 
-    this.projectileSystem.fire(bx + ox, by + oy, facing, stats);
+    // Aim along the mouse cursor when we have one; fall back to facing.
+    const aim = this.input_.aim;
+    const angle = aim
+      ? Phaser.Math.Angle.Between(bx, by, aim.x, aim.y)
+      : undefined;
+
+    if (angle !== undefined) {
+      // Face the shot so the animation reads correctly.
+      const deg = Phaser.Math.RadToDeg(angle);
+      if (deg > -45 && deg <= 45)        this.player.sprite.setFlipX(false);
+      else if (deg > 135 || deg <= -135) this.player.sprite.setFlipX(true);
+    }
+
+    this.projectileSystem.fire(bx + ox, by + oy, facing, stats, angle);
     if (this.anims.exists("player_doing")) this.player.sprite.play("player_doing", true);
+  }
+
+  private _isBowEquipped(): boolean {
+    const gs = window.__gameStore?.getState?.()?.state as Record<string, unknown> | undefined;
+    return gs?.bowEquipped === true;
   }
 
   /**
