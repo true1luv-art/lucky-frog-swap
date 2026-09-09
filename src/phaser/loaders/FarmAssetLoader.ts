@@ -4,6 +4,7 @@ export const FarmAssetLoader = {
   load(scene: Phaser.Scene) {
     this._loadTilemap(scene)
     this._loadResourceNodes(scene)
+    this._loadVfx(scene)
     this._loadUICorners(scene)
     this._loadAudio(scene)
   },
@@ -76,6 +77,10 @@ export const FarmAssetLoader = {
     scene.load.image('feed_wheat',   'assets/crops/wheat/crop.png')
     scene.load.image('feed_kale',    'assets/crops/kale/crop.png')
     scene.load.image('feed_cabbage', 'assets/crops/cabbage/crop.png')
+  },
+
+  _loadVfx(scene: Phaser.Scene) {
+    scene.load.spritesheet('vfx_arrow', 'assets/phaser/sprites/vfx/arrow_strip4.png', { frameWidth: 48, frameHeight: 48 })
   },
 
   _loadUICorners(scene: Phaser.Scene) {
