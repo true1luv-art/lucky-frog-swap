@@ -101,6 +101,7 @@ export class EnemySystem {
       enemy.hp = enemy.maxHp;
       enemy.state = "idle";
       enemy.windupUntil = 0;
+      enemy.provokedUntil = 0;
       enemy.drawHpBar();
     }
     this.paths.clear();
@@ -169,6 +170,7 @@ export class EnemySystem {
       const winding = enemy.windupUntil > 0;
       const decision = decideEnemyState({
         config: cfg, state: enemy.state, distPlayer, distSpawn, winding,
+        provoked: now < enemy.provokedUntil,
       });
       enemy.state = decision.state;
       if (decision.cancelWindup) enemy.windupUntil = 0;

@@ -27,6 +27,8 @@ export class Enemy {
   nextWanderAt = 0;
   /** Epoch ms when the telegraphed swing lands; 0 when not winding up. */
   windupUntil = 0;
+  /** Epoch ms until which this enemy chases the player after being hit. */
+  provokedUntil = 0;
   dying = false;
   /** Direction row used for the sprite animations. */
   facing: Facing = DEFAULT_FACING;

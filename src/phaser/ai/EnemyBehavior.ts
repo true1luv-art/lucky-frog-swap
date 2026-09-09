@@ -24,6 +24,8 @@ export interface BehaviorInput {
   distSpawn: number;
   /** True while a telegraphed swing is still resolving. */
   winding: boolean;
+  /** True while the enemy is provoked (recently damaged by the player). */
+  provoked: boolean;
 }
 
 export interface BehaviorResult {
@@ -34,7 +36,7 @@ export interface BehaviorResult {
 
 /** Decide the next state for one enemy this frame. */
 export function decideEnemyState(input: BehaviorInput): BehaviorResult {
-  const { config, state, distPlayer, winding } = input;
+  const { config, state, distPlayer, winding, provoked } = input;
   const attackRange = config.attackRangeTiles * TS;
   const aggro = config.aggroRangeTiles * TS;
   const engaged = state === "chase" || state === "attack";
@@ -46,10 +48,11 @@ export function decideEnemyState(input: BehaviorInput): BehaviorResult {
     return { state: "attack", cancelWindup: false };
   }
 
-  if (engaged) {
-    // A chase follows the player, never the spawn point. Only a player who
-    // really outruns the enemy breaks it off.
-    if (distPlayer <= aggro * ENEMY_DEAGGRO_FACTOR) {
+  if (engaged || provoked) {
+    // A chase follows the player, never the spawn point. A provoked enemy
+    // keeps coming no matter how far the player ran from its spawn point —
+    // the leash only re-applies once the provocation wears off.
+    if (provoked || distPlayer <= aggro * ENEMY_DEAGGRO_FACTOR) {
       return { state: "chase", cancelWindup: false };
     }
     return { state: "return", cancelWindup: true };
