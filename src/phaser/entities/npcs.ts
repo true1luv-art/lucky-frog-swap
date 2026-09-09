@@ -28,10 +28,12 @@ export function createNpcSprite(
     ? requestedTexture
     : NPC_CONFIG.textureKey
   const origin = options.origin ?? 0.5
+  // NPCs use the same spritesheets as the player, so they must render at their
+  // native frame size (scale 1) instead of being squashed into the tile box.
   const sprite = scene.add
     .sprite(options.x, options.y, texture, 0)
     .setOrigin(origin, origin)
-    .setDisplaySize(options.width, options.height)
+    .setScale(1)
     .setFlipX(options.facing === 'left')
 
   if (options.depth !== undefined) sprite.setDepth(options.depth)
