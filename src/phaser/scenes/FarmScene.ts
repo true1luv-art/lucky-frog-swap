@@ -148,28 +148,24 @@ export class FarmScene extends Phaser.Scene {
     this.player.sprite.setDepth(this.player.sprite.y);
 
     const movement = this.input_.getMovement();
-    const canAnim  = (key: string) => this.anims.exists(key);
 
     const currentAnim   = this.player.sprite.anims?.currentAnim?.key;
+    const currentBase   = animBase(currentAnim);
     const actionAnims   = [
       "player_mine", "player_axe", "player_doing", "player_shovel", "player_hammer",
       "player_casting", "player_reeling", "player_caught",
     ];
     const playingAction =
-      actionAnims.includes(currentAnim ?? "") && this.player.sprite.anims?.isPlaying;
+      actionAnims.includes(currentBase) && this.player.sprite.anims?.isPlaying;
 
     if (!playingAction) {
+      const facing = (this.player.facing ?? "down") as Facing;
       if (movement.moving) {
-        (this.player as unknown as Record<string, unknown>).facing = movement.facing;
         this.player.applyMovement(movement);
-        if (canAnim("player_walk") && currentAnim !== "player_walk") {
-          this.player.sprite.play("player_walk", true);
-        }
+        playDirectional(this.player.sprite, "player_walk", movement.facing as Facing);
       } else {
         (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
-        if (canAnim("player_idle") && currentAnim !== "player_idle") {
-          this.player.sprite.play("player_idle", true);
-        }
+        playDirectional(this.player.sprite, "player_idle", facing);
       }
     } else {
       (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
