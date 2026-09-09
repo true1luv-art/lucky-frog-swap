@@ -4,7 +4,7 @@ export interface NpcPositionDef {
   y: number
   width: number
   height: number
-  facing?: 'left' | 'right'
+  facing?: 'up' | 'down' | 'left' | 'right'
   texture?: string
   event?: string
   /** Display name shown as a floating label above the NPC sprite. */

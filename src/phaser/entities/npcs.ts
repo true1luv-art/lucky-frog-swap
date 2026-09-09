@@ -1,5 +1,6 @@
 import type Phaser from 'phaser'
 import { NPC_CONFIG } from '@/phaser/config/GameConfig'
+import { directionalKey, type Facing } from '@/phaser/systems/DirectionalAnimation'
 import type { NpcPositionDef } from '@/phaser/positions/npcPositions'
 import type { NpcNode } from '@/phaser/farm/types'
 
@@ -13,7 +14,7 @@ interface NpcSpriteOptions {
   width: number
   height: number
   texture?: string
-  facing?: 'left' | 'right'
+  facing?: Facing
   origin?: number
   depth?: number
 }
@@ -34,11 +35,16 @@ export function createNpcSprite(
     .sprite(options.x, options.y, texture, 0)
     .setOrigin(origin, origin)
     .setScale(1)
-    .setFlipX(options.facing === 'left')
+    .setFlipX(false)
 
   if (options.depth !== undefined) sprite.setDepth(options.depth)
 
-  const animationKey = npcIdleAnimationKey(texture)
+  // NPC sheets carry the same 4 direction rows as the player, so the facing
+  // is chosen by animation row instead of flipping the sprite.
+  const base = npcIdleAnimationKey(texture)
+  const facing: Facing = options.facing ?? 'down'
+  const directional = directionalKey(base, facing)
+  const animationKey = scene.anims.exists(directional) ? directional : base
   if (scene.anims.exists(animationKey)) sprite.play(animationKey, true)
   return sprite
 }
