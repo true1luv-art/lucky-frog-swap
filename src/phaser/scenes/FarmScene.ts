@@ -552,6 +552,7 @@ export class FarmScene extends Phaser.Scene {
     this.enemySystem = new EnemySystem(this, {
       onPlayerHit: (damage) => this._hurtPlayer(damage),
       onEnemyKilled: (enemy) => this._rewardKill(enemy),
+      isTileBlocked: (tileX, tileY) => this.worldSystem?.isTileBlocked(tileX, tileY) ?? false,
     });
     this.enemySystem.create();
 
