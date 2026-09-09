@@ -47,7 +47,7 @@ export class ProjectileSystem {
     g.fillStyle(0xf2e6c9, 1);
     g.fillRect(0, 1, 2, 2);      // fletching
     g.fillRect(0, 5, 2, 2);
-    g.generateTexture(ARROW_TEXTURE, 13, 8);
+    g.generateTexture(ARROW_FALLBACK_TEXTURE, 13, 8);
     g.destroy();
   }
 
@@ -62,7 +62,7 @@ export class ProjectileSystem {
     stats: BowStats,
     angleRad?: number,
   ) {
-    const sprite = this.group.get(x, y, ARROW_TEXTURE) as Phaser.Physics.Arcade.Sprite | null;
+    const sprite = this.group.get(x, y, this.texture) as Phaser.Physics.Arcade.Sprite | null;
     if (!sprite) return;
 
     sprite.setActive(true).setVisible(true);
@@ -79,11 +79,14 @@ export class ProjectileSystem {
           }[facing]
         : { x: Math.cos(angleRad), y: Math.sin(angleRad) };
 
+    const usesSheet = this.texture === ARROW_TEXTURE;
     const body = sprite.body as Phaser.Physics.Arcade.Body | null;
     body?.setAllowGravity(false);
-    body?.setSize(10, 6);
+    body?.setSize(10, 10);
+    if (usesSheet) body?.setOffset((48 - 10) / 2, (48 - 10) / 2);
     sprite.setVelocity(dir.x * ARROW_SPEED, dir.y * ARROW_SPEED);
-    sprite.setRotation(Math.atan2(dir.y, dir.x));
+    sprite.setRotation(Math.atan2(dir.y, dir.x) + (usesSheet ? ARROW_ART_OFFSET : 0));
+    if (usesSheet) sprite.setFrame(0);
 
     this.arrows.push({
       sprite,
