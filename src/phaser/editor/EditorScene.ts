@@ -145,6 +145,8 @@ export class EditorScene extends Phaser.Scene {
     this.emitAnimalCounts();
     this.emitCamera();
 
+    if (import.meta.env.DEV) (window as unknown as Record<string, unknown>)["__editorScene"] = this;
+
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.teardown());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.teardown());
   }
