@@ -205,7 +205,7 @@ export class EnemySystem {
           ) {
             enemy.lastAttackAt = now;
             enemy.windupUntil = now + cfg.attackWindupMs;
-            this.playOnce(enemy, "player_axe");
+            this.playOnce(enemy, "player_sword");
           }
           break;
         }
@@ -264,14 +264,14 @@ export class EnemySystem {
 
   private playLoop(enemy: Enemy, key: string) {
     const current = enemy.sprite.anims?.currentAnim?.key;
-    if (animBase(current) === "player_axe" && enemy.sprite.anims?.isPlaying) return;
+    if (animBase(current) === "player_sword" && enemy.sprite.anims?.isPlaying) return;
     const facing = (enemy.facing ?? "down") as Facing;
     if (current === `${key}_${facing}` || current === key) return;
     playDirectional(enemy.sprite, key, facing);
   }
 
   private playOnce(enemy: Enemy, key: string) {
-    playDirectional(enemy.sprite, key, (enemy.facing ?? "down") as Facing, true);
+    playDirectional(enemy.sprite, key, (enemy.facing ?? "down") as Facing, false);
   }
 
   destroy() {
