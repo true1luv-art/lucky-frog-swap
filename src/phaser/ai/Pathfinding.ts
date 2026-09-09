@@ -165,3 +165,22 @@ export function nextWaypoint(
   }
   return null;
 }
+
+/** Closest walkable tile to `tile` within a small ring search. */
+export function nearestWalkable(
+  tile: TilePoint,
+  isBlocked: (tileX: number, tileY: number) => boolean,
+  maxRadius = 3,
+): TilePoint | null {
+  for (let r = 1; r <= maxRadius; r++) {
+    for (let dx = -r; dx <= r; dx++) {
+      for (let dy = -r; dy <= r; dy++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        const x = tile.x + dx;
+        const y = tile.y + dy;
+        if (!isBlocked(x, y)) return { x, y };
+      }
+    }
+  }
+  return null;
+}
