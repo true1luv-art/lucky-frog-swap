@@ -159,7 +159,7 @@ export class FarmScene extends Phaser.Scene {
     const currentBase   = animBase(currentAnim);
     const actionAnims   = [
       "player_mine", "player_axe", "player_doing", "player_shovel", "player_hammer",
-      "player_casting", "player_reeling", "player_caught",
+      "player_casting", "player_reeling", "player_caught", "player_bow",
     ];
     const playingAction =
       actionAnims.includes(currentBase) && this.player.sprite.anims?.isPlaying;
@@ -242,7 +242,7 @@ export class FarmScene extends Phaser.Scene {
     const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
 
     this.projectileSystem.fire(bx + ox, by + oy, facing, stats, angle);
-    playDirectional(this.player.sprite, "player_casting", facing as Facing);
+    playDirectional(this.player.sprite, "player_bow", facing as Facing, false);
   }
 
   /** The bow is a normal inventory tool: it is "equipped" when it is the
