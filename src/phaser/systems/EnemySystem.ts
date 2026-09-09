@@ -7,6 +7,12 @@ import {
   ENEMY_SEPARATION_PX,
 } from "@/features/game/enemies";
 import { ENEMY_SPAWN_POINTS, type EnemySpawnPoint } from "@/phaser/positions/enemySpawnPoints";
+import {
+  animBase,
+  facingFromVector,
+  playDirectional,
+  type Facing,
+} from "@/phaser/systems/DirectionalAnimation";
 
 
 const TS = GAME_CONFIG.TILE_SIZE;
@@ -182,7 +188,7 @@ export class EnemySystem {
         }
         case "attack": {
           this.stop(enemy);
-          if (!winding) enemy.sprite.setFlipX(px < ex);
+          if (!winding) enemy.facing = facingFromVector(px - ex, py - ey);
 
           if (winding) {
             // Resolve the telegraphed swing: it only connects if the player is
@@ -246,7 +252,7 @@ export class EnemySystem {
 
     const body = enemy.sprite.body as Phaser.Physics.Arcade.Body | null;
     body?.setVelocity((dx / dist) * speed, (dy / dist) * speed);
-    if (Math.abs(dx) > 1) enemy.sprite.setFlipX(dx < 0);
+    enemy.facing = facingFromVector(dx, dy);
     this.playLoop(enemy, "player_walk");
     return false;
   }
@@ -258,13 +264,14 @@ export class EnemySystem {
 
   private playLoop(enemy: Enemy, key: string) {
     const current = enemy.sprite.anims?.currentAnim?.key;
-    if (current === "player_axe" && enemy.sprite.anims?.isPlaying) return;
-    if (current === key) return;
-    if (this.scene.anims.exists(key)) enemy.sprite.play(key, true);
+    if (animBase(current) === "player_axe" && enemy.sprite.anims?.isPlaying) return;
+    const facing = (enemy.facing ?? "down") as Facing;
+    if (current === `${key}_${facing}` || current === key) return;
+    playDirectional(enemy.sprite, key, facing);
   }
 
   private playOnce(enemy: Enemy, key: string) {
-    if (this.scene.anims.exists(key)) enemy.sprite.play(key, true);
+    playDirectional(enemy.sprite, key, (enemy.facing ?? "down") as Facing, true);
   }
 
   destroy() {

@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { Player } from "@/phaser/entities/Player";
 import type { ResourceNode } from "@/phaser/farm/types";
 import { dispatchUiEvent } from "@/phaser/farm/helpers";
+import { facingFromVector, playDirectional } from "@/phaser/systems/DirectionalAnimation";
 import {
   STONE_RECOVERY_SECONDS,
   TREE_RECOVERY_SECONDS,
