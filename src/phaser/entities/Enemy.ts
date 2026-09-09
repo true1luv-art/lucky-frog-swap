@@ -24,7 +24,10 @@ export class Enemy {
   targetY = 0;
   lastAttackAt = 0;
   nextWanderAt = 0;
+  /** Epoch ms when the telegraphed swing lands; 0 when not winding up. */
+  windupUntil = 0;
   dying = false;
+
 
   constructor(scene: Phaser.Scene, id: string, type: EnemyType, x: number, y: number) {
     this.id = id;
