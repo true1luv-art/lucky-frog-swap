@@ -26,15 +26,19 @@ export class ProjectileSystem {
   arrows: Arrow[] = [];
   private scene: Phaser.Scene;
 
+  private texture: string;
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this._ensureTexture();
-    this.group = scene.physics.add.group({ defaultKey: ARROW_TEXTURE, allowGravity: false });
+    this.texture = scene.textures.exists(ARROW_TEXTURE) ? ARROW_TEXTURE : ARROW_FALLBACK_TEXTURE;
+    this.group = scene.physics.add.group({ defaultKey: this.texture, allowGravity: false });
   }
 
-  /** Draws a tiny pixel arrow once and caches it as a texture. */
+  /** Fallback: draws a tiny pixel arrow when the sprite sheet is missing. */
   private _ensureTexture() {
     if (this.scene.textures.exists(ARROW_TEXTURE)) return;
+    if (this.scene.textures.exists(ARROW_FALLBACK_TEXTURE)) return;
     const g = this.scene.add.graphics();
     g.fillStyle(0x6b4423, 1);
     g.fillRect(0, 3, 9, 2);      // shaft
