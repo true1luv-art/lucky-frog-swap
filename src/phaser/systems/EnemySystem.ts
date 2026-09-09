@@ -185,14 +185,11 @@ export class EnemySystem {
             // still inside reach when the blow actually lands.
             if (now >= enemy.windupUntil) {
               enemy.windupUntil = 0;
-              if (distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR) {
+              if (shouldAttackConnect(cfg, distPlayer)) {
                 this.opts.onPlayerHit(cfg.damage);
               }
             }
-          } else if (
-            distPlayer <= attackRange &&
-            now - enemy.lastAttackAt >= cfg.attackCooldownMs
-          ) {
+          } else if (canStartAttack(cfg, distPlayer, enemy.lastAttackAt, now)) {
             enemy.lastAttackAt = now;
             enemy.windupUntil = now + cfg.attackWindupMs;
             this.playOnce(enemy, "player_sword");
