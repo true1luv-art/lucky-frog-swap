@@ -28,6 +28,7 @@
 import Decimal from "decimal.js-light";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { ToolTier } from "@/features/types/gameplay/tools";
 import type { GameState } from "@/features/types/gameplay";
 import type { GameAction, GameEvent } from "@/features/events";
 import { processGameEvent } from "@/features/events";
