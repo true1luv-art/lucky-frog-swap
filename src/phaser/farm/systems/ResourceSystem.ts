@@ -89,9 +89,13 @@ export class ResourceSystem {
     const player    = this.options.player();
     const sprite    = player?.sprite;
     const nodeCenterX = node.x + GAME_CONFIG.TILE_SIZE;
+    const nodeCenterY = node.y + GAME_CONFIG.TILE_SIZE;
     const facingLeft  = (sprite?.x ?? nodeCenterX) > nodeCenterX;
-    sprite?.setFlipX(facingLeft);
-    if (player) (player as unknown as Record<string, unknown>).facing = facingLeft ? "left" : "right";
+    const facing = facingFromVector(
+      nodeCenterX - (sprite?.x ?? nodeCenterX),
+      nodeCenterY - (sprite?.y ?? nodeCenterY),
+    );
+    if (player) (player as unknown as Record<string, unknown>).facing = facing;
 
     const applyVisual = () => {
       if (depleting) {

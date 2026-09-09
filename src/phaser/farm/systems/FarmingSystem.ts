@@ -239,7 +239,7 @@ export class FarmingSystem {
       if (handled) return;
       handled = true;
       sprite.off("animationcomplete", finish);
-      sprite.play("player_idle", true);
+      playDirectional(sprite, "player_idle", facing);
       this.doingAction = false;
     });
   }
