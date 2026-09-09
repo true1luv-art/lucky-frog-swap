@@ -152,7 +152,7 @@ export class FarmScene extends Phaser.Scene {
 
     const currentAnim   = this.player.sprite.anims?.currentAnim?.key;
     const actionAnims   = [
-      "player_mine", "player_axe", "player_doing",
+      "player_mine", "player_axe", "player_doing", "player_shovel", "player_hammer",
       "player_casting", "player_reeling", "player_caught",
     ];
     const playingAction =
