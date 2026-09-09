@@ -4,6 +4,7 @@ import { FarmAssetLoader } from "@/phaser/loaders/FarmAssetLoader";
 import { NpcAssetLoader } from "@/phaser/loaders/NpcAssetLoader";
 import { createNpcSprite } from "@/phaser/entities/npcs";
 import { AnimationSystem } from "@/phaser/systems/AnimationSystem";
+import type { Facing } from "@/phaser/systems/DirectionalAnimation";
 import {
   BARN_ZONE,
   BUILDING_POSITIONS,
