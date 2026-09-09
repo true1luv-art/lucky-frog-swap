@@ -2,7 +2,10 @@ import Phaser from "phaser";
 import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { BowStats } from "@/features/game/bow";
 
-const ARROW_TEXTURE = "combat_arrow";
+const ARROW_TEXTURE = "vfx_arrow";
+const ARROW_FALLBACK_TEXTURE = "combat_arrow";
+/** The sprite art points up, so rotate by +90° relative to travel angle. */
+const ARROW_ART_OFFSET = Math.PI / 2;
 const ARROW_SPEED = 320; // px/s
 
 export interface Arrow {
