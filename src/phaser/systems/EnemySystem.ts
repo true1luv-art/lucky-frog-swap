@@ -60,6 +60,10 @@ export class EnemySystem {
   private respawnAt = new Map<string, number>();
   /** enemy id → cached A* route while chasing */
   private paths = new Map<string, ChasePath>();
+  /** enemy id → last known position, for stuck detection */
+  private progress = new Map<string, { x: number; y: number; at: number }>();
+  /** enemy id → temporary sidestep target while unsticking */
+  private detours = new Map<string, { x: number; y: number; until: number }>();
 
   constructor(scene: Phaser.Scene, opts: EnemySystemOptions) {
     this.scene = scene;
