@@ -27,7 +27,7 @@ export const NPC_ANIMS: AnimationDefinition[] = [
   { key: 'npc_idle', texture: 'npc_base', frames: 9, frameRate: 6, repeat: -1 },
   { key: 'npc_rancher_idle', texture: 'npc_rancher', frames: 9, frameRate: 9, repeat: -1 },
   { key: 'npc_trader_idle', texture: 'npc_trader', frames: 9, frameRate: 9, repeat: -1 },
-  { key: 'npc_blacksmith_idle', texture: 'npc_blacksmith', frames: 23, frameRate: 9, repeat: -1, skipMissedFrames: false },
+  { key: 'npc_blacksmith_idle', texture: 'npc_blacksmith', frames: 23, frameRate: 23, repeat: -1 },
 ]
 
 export const ANIMAL_ANIMS: AnimationDefinition[] = [
