@@ -1,8 +1,13 @@
 import Phaser from "phaser";
 import { GAME_CONFIG, PLAYER_CONFIG } from "@/phaser/config/GameConfig";
 import { Enemy } from "@/phaser/entities/Enemy";
-import { ENEMY_LEASH_TILES } from "@/features/game/enemies";
+import {
+  ENEMY_LEASH_TILES,
+  ENEMY_ATTACK_EXIT_FACTOR,
+  ENEMY_SEPARATION_PX,
+} from "@/features/game/enemies";
 import { ENEMY_SPAWN_POINTS, type EnemySpawnPoint } from "@/phaser/positions/enemySpawnPoints";
+
 
 const TS = GAME_CONFIG.TILE_SIZE;
 
@@ -60,6 +65,7 @@ export class EnemySystem {
       (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
       enemy.hp = enemy.maxHp;
       enemy.state = "idle";
+      enemy.windupUntil = 0;
       enemy.drawHpBar();
     }
   }
@@ -119,9 +125,21 @@ export class EnemySystem {
       );
 
       // ── Decide state ───────────────────────────────────────────────────
+      const attackRange = cfg.attackRangeTiles * TS;
+      const winding = enemy.windupUntil > 0;
+
       if (distSpawn > ENEMY_LEASH_TILES * TS) {
         enemy.state = "return";
-      } else if (distPlayer <= cfg.attackRangeTiles * TS) {
+        enemy.windupUntil = 0;
+      } else if (winding) {
+        enemy.state = "attack";
+      } else if (distPlayer <= attackRange) {
+        enemy.state = "attack";
+      } else if (
+        enemy.state === "attack" &&
+        distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR
+      ) {
+        // Hysteresis — hold the attack stance instead of flickering back to chase.
         enemy.state = "attack";
       } else if (distPlayer <= cfg.aggroRangeTiles * TS) {
         enemy.state = "chase";
@@ -164,11 +182,24 @@ export class EnemySystem {
         }
         case "attack": {
           this.stop(enemy);
-          enemy.sprite.setFlipX(px < ex);
-          if (now - enemy.lastAttackAt >= cfg.attackCooldownMs) {
+          if (!winding) enemy.sprite.setFlipX(px < ex);
+
+          if (winding) {
+            // Resolve the telegraphed swing: it only connects if the player is
+            // still inside reach when the blow actually lands.
+            if (now >= enemy.windupUntil) {
+              enemy.windupUntil = 0;
+              if (distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR) {
+                this.opts.onPlayerHit(cfg.damage);
+              }
+            }
+          } else if (
+            distPlayer <= attackRange &&
+            now - enemy.lastAttackAt >= cfg.attackCooldownMs
+          ) {
             enemy.lastAttackAt = now;
+            enemy.windupUntil = now + cfg.attackWindupMs;
             this.playOnce(enemy, "player_axe");
-            this.opts.onPlayerHit(cfg.damage);
           }
           break;
         }
@@ -177,7 +208,33 @@ export class EnemySystem {
       enemy.sprite.setDepth(enemy.sprite.y);
       enemy.drawHpBar();
     }
+
+    this.separate();
   }
+
+  /**
+   * Keeps enemies from stacking into a single sprite when several chase the
+   * player, so each one stays individually readable and hittable.
+   */
+  private separate() {
+    const living = this.enemies.filter((e) => !e.dying);
+    for (let i = 0; i < living.length; i++) {
+      for (let j = i + 1; j < living.length; j++) {
+        const a = living[i];
+        const b = living[j];
+        const dx = b.bodyX - a.bodyX;
+        const dy = b.bodyY - a.bodyY;
+        const dist = Math.hypot(dx, dy);
+        if (dist === 0 || dist >= ENEMY_SEPARATION_PX) continue;
+        const push = (ENEMY_SEPARATION_PX - dist) / 2;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        a.sprite.setPosition(a.sprite.x - nx * push, a.sprite.y - ny * push);
+        b.sprite.setPosition(b.sprite.x + nx * push, b.sprite.y + ny * push);
+      }
+    }
+  }
+
 
   // ── Movement helpers ─────────────────────────────────────────────────────
 
