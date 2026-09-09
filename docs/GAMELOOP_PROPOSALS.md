@@ -1,102 +1,127 @@
 # Lucky Frog — Game Loop Proposals
 
-_Written 2026-09-09. Three proposals for the core economy loop, plus a review of what the game does today._
+_Updated 2026-09-09. Reworked around four seeds, crop-fed animals, and a new enemy/combat system with Archero-style bow mechanics._
 
 ---
 
-## 1. Where the gameplay stands today
+## 1. Design pillars (the new rules)
 
-**Already matches your idea:**
+1. **Four seeds only** — Potato, Carrot, Cabbage, Wheat. (Pumpkin is cut for now.)
+2. **Crops feed animals** — Carrot feeds the Chicken, Cabbage feeds the Sheep, Wheat feeds the Cow. Potato is the pure cash/food crop.
+3. **Food restores HP** — cooking matters because combat drains HP.
+4. **Enemies exist** — a new entity (using the player sprites for now) spawns, wanders, spots the player, chases, and attacks.
+5. **Combat is Archero-style** — the player attacks with a bow that fires arrows in a straight line with a fixed range. No auto-hit: arrows travel and can miss, so positioning and movement are the skill.
 
-- Seeds are bought with Wood and Stone, not gold (`src/features/types/gameplay/crops.ts`):
-
-  | Seed | Cost | Growth |
-  |---|---|---|
-  | Potato Seed | 3 Wood | 1 min |
-  | Carrot Seed | 4 Stone | 5 min |
-  | Cabbage Seed | 4 Wood + 4 Stone | 10 min |
-  | Pumpkin Seed | 6 Wood + 6 Stone | 30 min |
-  | Wheat Seed | 8 Wood + 10 Stone | 12 hr |
-
-- Crops, cooked food, fish and animal produce all sell for gold (`src/features/game/sell-prices.ts`).
-- Cooking always burns 1 Wood as fuel, so food competes with seeds for wood.
-- Gold currently buys animals (Chicken 10, Cow 40, Sheep 25) and little else.
-
-**Problems worth fixing:**
-
-1. **Gold is a dead end.** You earn it, but there is almost nothing to spend it on. Farm levels cost XP (and token spend), not gold, so the reward loop terminates.
-2. **Selling raw resources undercuts farming.** Wood sells for 3 and Stone for 4, while a Potato sells for 2. Chopping wood and selling it is faster gold than planting potatoes, so the farm is optional.
-3. **Wood is triple-taxed** (seeds, cooking fuel, tool crafting) but there is no wood-supply upgrade — no axe efficiency you can buy, no replanting, no lumber yard.
-4. **No decision at harvest.** Selling the crop raw is nearly always worse than cooking it, so the "choice" isn't a choice. Cabbage 8 raw vs Cabbage Roll 20.
-5. **Wheat at 12 hours** is a hard wall for a session-based game with no offline mechanic to reward the wait.
-6. **HP has no drain.** Food restores HP/shield, but nothing takes HP away, so cooking is only a sell-price multiplier rather than a survival need.
+The economy stays: seeds cost Wood + Stone; selling crops, cooked food, fish and animal produce pays Gold.
 
 ---
 
-## 2. Proposal A — "Gathering funds the farm, the farm funds the town" (smallest change)
+## 2. Seed & animal mapping
 
-Keep the current shape; close the gold loop and stop resource-selling from being the best strategy.
+| Seed | Cost (proposal) | Growth | Purpose |
+|---|---|---|---|
+| Potato Seed | 3 Wood | 1 min | Cash crop + basic cooking (Baked Potato → HP) |
+| Carrot Seed | 4 Stone | 5 min | Chicken feed → Eggs |
+| Cabbage Seed | 4 Wood + 4 Stone | 10 min | Sheep feed → Wool |
+| Wheat Seed | 8 Wood + 10 Stone | 12 hr | Cow feed → Milk |
 
-**Changes**
-
-- Remove Wood and Stone from the Market entirely (or cut them to 1 coin). Resources become inputs only, never a payout.
-- Gold gets real sinks, all sold in town:
-  - **Tool upgrades** — Stone/Iron tier axe & pickaxe: +1 yield per swing, bought with gold + ore.
-  - **Plot expansion** — each extra field plot costs escalating gold (50, 120, 250, …).
-  - **Seed vendor bulk deals** — pay gold to skip the wood/stone cost when you're resource-starved.
-  - **Animals** stay, plus barn slots.
-- Raise crop prices ~30% so farming beats gathering per minute of play.
-
-**Loop:** chop/mine → buy seeds → water, harvest → cook or sell → gold → tools & plots → gather faster → bigger farm.
-
-**Pros:** ships in a day, no new systems, fixes the dead-end gold problem directly.
-**Cons:** still a single-track economy; no long-term goal past maxed tools.
+Every farmed crop now has a job: Potato → gold/food, the other three → animal produce → higher gold. Wheat's 12-hour timer is now justified because Milk is the top-tier produce.
 
 ---
 
-## 3. Proposal B — "Cook, Eat, Explore" (stamina/HP-driven)
+## 3. Enemy system (new entity)
 
-Make food the fuel of play, so cooking has a purpose beyond sell value.
+**Rendering:** reuse the player sprite sheets for now — `player_idle`, `player_walk`, `player_axe` (the swing reads as a melee attack). Distinct tint (e.g. red) so enemies read as hostile. Swap in dedicated enemy art later without touching logic.
 
-**Changes**
+**AI state machine:**
 
-- **Every gather action costs HP** (chop 3, mine 4, fish 2, water 1). At 0 HP you can only walk and cook.
-- Food restores HP by tier — Baked Potato 20, Wheat Bread 50, Pumpkin Pie 60 — so higher farming tiers translate into longer play sessions.
-- **Wood and Stone remain unsellable.** Gold comes only from food, fish and produce — you must process before you profit.
-- Add a **third resource area gated by HP**: a mine deeper in that costs 8 HP per swing but drops ore for tools and gold-rich gems.
-- Seeds keep the wood/stone cost, so each session is a budget: how much wood goes to seeds, how much to cooking fuel.
+```text
+SPAWN → WANDER (random walk in a home radius)
+      → ALERT  (player enters vicinity/aggro radius)
+      → CHASE  (move toward player)
+      → ATTACK (in melee range: play attack anim, deal damage, cooldown)
+      → RETURN (player escaped far enough → walk back to home → WANDER)
+```
 
-**Loop:** eat → gather → seeds + cooking fuel → crops → cook → gold and HP → deeper mine → better tools → cheaper gathering.
+**Parameters to tune:**
 
-**Pros:** creates a genuine per-session decision, makes all five crops matter, gives food a job.
-**Cons:** needs HP drain, an out-of-HP recovery path (slow regen or a free food), and careful tuning to avoid dead-end states.
-
----
-
-## 4. Proposal C — "Contracts and the town economy" (long-horizon)
-
-Layer a demand system on top so prices and goals shift daily.
-
-**Changes**
-
-- **Daily contracts** from the three NPCs, replacing flat prices as the main payout:
-  - Rancher wants 5 Milk + 3 Wool → 180 gold + XP.
-  - Trader wants 10 Wheat Bread → 500 gold + a rare seed.
-  - Blacksmith wants 20 Stone + 5 Ore → tool upgrade token.
-- **Flat market prices drop ~40%.** Selling into the market becomes the fallback; contracts are the real money.
-- **Rotating price surges** — one crop or food per day sells at 2×, so the optimal planting changes daily.
-- Gold sinks: contract rerolls, permanent barn/plot deeds, NPC reputation unlocks (better contracts at higher rep).
-- Wheat's 12-hour timer becomes an asset: overnight wheat feeds tomorrow's bread contracts.
-
-**Loop:** read the board → plan the day's planting → gather → plant/cook → fulfil contracts → gold + reputation → better contracts.
-
-**Pros:** highest retention, gives daily logins meaning, uses the NPCs and quest system already in the codebase.
-**Cons:** most work — contract generation, reputation, price rotation, and persistence (needs a backend for real daily rotation).
+- Spawn points: fixed spots in the wild/mine areas, on a respawn timer.
+- Aggro radius (e.g. 6 tiles), de-aggro radius (e.g. 10 tiles).
+- Wander pause/interval, chase speed slightly below player speed so escape is possible.
+- Attack range ~1 tile, damage per hit, attack cooldown.
+- Enemy HP: 2–4 arrows to kill; drops (gold, ore, rare seeds) on death.
 
 ---
 
-## 5. Recommendation
+## 4. Combat — Archero-style bow
 
-Ship **A** first (a day's work; it makes the existing economy make sense), then **B** (turns the loop into a real decision), then **C** as the retention layer once progress is saved server-side.
+**Mechanics:**
 
-The single highest-value change regardless of path: **stop letting players sell Wood and Stone for more than a crop is worth.** That one line of tuning is what currently makes the farm optional.
+- Attack fires an **arrow projectile** in the player's facing direction.
+- Arrow flies in a **straight line only**, up to a **fixed maximum range**, then fizzles.
+- **No auto-hit / no homing** — the arrow is a physical projectile; it hits the first enemy it collides with. Missing is possible.
+- Consequence: the player must **walk to line up shots** and kite enemies — move, stop, shoot, move. This is the Archero feel.
+
+**Implementation notes:**
+
+- Arrow = arcade-physics sprite, destroyed on wall/enemy/max-range.
+- Enemy contact damage vs arrow damage both flow into the HP system (`features/game/hp.ts`).
+- HP drain finally gives cooked food a purpose: eat to heal between fights.
+- Death handling: at 0 HP, respawn at the farm with a small penalty (drop some gold or resources).
+
+**Later upgrades (gold sink!):** bow tiers — more damage, longer range, faster fire rate, multi-shot.
+
+---
+
+## 5. Three proposals for the full loop
+
+### Proposal A — "Farm funds the fight" (smallest change)
+
+Close the gold loop and bolt combat on as the gold sink.
+
+- Seeds cost Wood/Stone as in the table above; **Wood and Stone become unsellable** (or 1 coin) so farming is mandatory, not optional.
+- Enemies guard the deep mine/forest where the best ore and wood are.
+- Gold sinks: bow upgrades, tool upgrades, plot expansion, animals.
+
+**Loop:** gather → seeds → farm → feed animals → sell produce → gold → better bow/tools → push deeper for better resources.
+
+**Pros:** ships fast, every system already half-exists. **Cons:** combat is a gate, not yet a pillar.
+
+### Proposal B — "Cook, Eat, Fight" (survival loop)
+
+Food becomes the fuel of combat.
+
+- Enemy hits drain HP; **only cooked food heals** (Baked Potato +20, etc.).
+- Farming is now doubly required: crops feed animals *and* the player.
+- Enemy zones have tiers; deeper zones hit harder, so you need better food (higher-tier crops) to survive — wheat's 12 hr wait produces the ingredients for the best meals.
+- Death = respawn at farm, small gold penalty.
+
+**Loop:** farm → cook → eat → fight → loot → sell → upgrade → fight deeper.
+
+**Pros:** gives all four crops and the kitchen a real job; combat and economy reinforce each other. **Cons:** needs careful tuning so players never soft-lock with 0 HP and no food (keep a free basic food or slow HP regen at the farm).
+
+### Proposal C — "Contracts & hunts" (long-horizon retention)
+
+Layer daily demand on top.
+
+- NPC daily contracts: Rancher wants 5 Milk, Trader wants 10 Wheat Bread, Blacksmith wants 10 ore + 3 enemy drops.
+- Flat market prices drop ~40%; contracts are the real money.
+- Daily bounty board: "clear 5 enemies from the mine" → gold + rare seed.
+- Reputation with NPCs unlocks better contracts and bow/tool tiers.
+
+**Loop:** read board → plan planting → farm/cook → hunt bounties → fulfil contracts → reputation → better everything.
+
+**Pros:** daily login meaning, uses the existing NPC/quest scaffolding. **Cons:** most work — needs persistence for real daily rotation.
+
+---
+
+## 6. Recommendation
+
+Build in this order:
+
+1. **Enemy entity + AI** (wander/chase/attack with player sprites) and the **arrow projectile** — the core new mechanic.
+2. **Proposal A** — make Wood/Stone unsellable, wire gold into bow/tool upgrades.
+3. **Proposal B** — HP drain and food healing.
+4. **Proposal C** — contracts once progress is saved server-side.
+
+The single highest-value change regardless of path: **stop letting players sell Wood and Stone for more than a crop is worth** — that one tuning line makes the farm mandatory, and the bow makes gold matter.
