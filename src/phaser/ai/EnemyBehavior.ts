@@ -34,24 +34,28 @@ export interface BehaviorResult {
 
 /** Decide the next state for one enemy this frame. */
 export function decideEnemyState(input: BehaviorInput): BehaviorResult {
-  const { config, state, distPlayer, distSpawn, winding } = input;
+  const { config, state, distPlayer, winding } = input;
   const attackRange = config.attackRangeTiles * TS;
+  const aggro = config.aggroRangeTiles * TS;
+  const engaged = state === "chase" || state === "attack";
 
-  if (distSpawn > ENEMY_LEASH_TILES * TS) {
-    return { state: "return", cancelWindup: true };
-  }
   if (winding) return { state: "attack", cancelWindup: false };
   if (distPlayer <= attackRange) return { state: "attack", cancelWindup: false };
   // Hysteresis — hold the attack stance instead of flickering back to chase.
   if (state === "attack" && distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR) {
     return { state: "attack", cancelWindup: false };
   }
-  if (distPlayer <= config.aggroRangeTiles * TS) {
-    return { state: "chase", cancelWindup: false };
+
+  if (engaged) {
+    // A chase follows the player, never the spawn point. Only a player who
+    // really outruns the enemy breaks it off.
+    if (distPlayer <= aggro * ENEMY_DEAGGRO_FACTOR) {
+      return { state: "chase", cancelWindup: false };
+    }
+    return { state: "return", cancelWindup: true };
   }
-  if (state === "chase" || state === "attack") {
-    return { state: "return", cancelWindup: false };
-  }
+
+  if (distPlayer <= aggro) return { state: "chase", cancelWindup: false };
   return { state, cancelWindup: false };
 }
 
