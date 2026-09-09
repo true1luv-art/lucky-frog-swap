@@ -133,28 +133,13 @@ export class EnemySystem {
         enemy.sprite.x, enemy.sprite.y, enemy.spawnX, enemy.spawnY,
       );
 
-      // ── Decide state ───────────────────────────────────────────────────
-      const attackRange = cfg.attackRangeTiles * TS;
+      // ── Decide state (see phaser/ai/EnemyBehavior) ─────────────────────
       const winding = enemy.windupUntil > 0;
-
-      if (distSpawn > ENEMY_LEASH_TILES * TS) {
-        enemy.state = "return";
-        enemy.windupUntil = 0;
-      } else if (winding) {
-        enemy.state = "attack";
-      } else if (distPlayer <= attackRange) {
-        enemy.state = "attack";
-      } else if (
-        enemy.state === "attack" &&
-        distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR
-      ) {
-        // Hysteresis — hold the attack stance instead of flickering back to chase.
-        enemy.state = "attack";
-      } else if (distPlayer <= cfg.aggroRangeTiles * TS) {
-        enemy.state = "chase";
-      } else if (enemy.state === "chase" || enemy.state === "attack") {
-        enemy.state = "return";
-      }
+      const decision = decideEnemyState({
+        config: cfg, state: enemy.state, distPlayer, distSpawn, winding,
+      });
+      enemy.state = decision.state;
+      if (decision.cancelWindup) enemy.windupUntil = 0;
 
       // ── Act ────────────────────────────────────────────────────────────
       switch (enemy.state) {
