@@ -21,6 +21,8 @@ type Win = Window & {
  * Stateless output per frame — no side effects.
  */
 export class InputSystem {
+  /** Set when the player presses the attack key / taps the attack button. */
+  attackRequested = false;
   private scene:       Phaser.Scene;
   private speed:       number;
   private isMobile:    boolean;
@@ -48,9 +50,25 @@ export class InputSystem {
         }) as typeof this.keys)
       : null;
 
+    // Attack: SPACE on desktop.
+    scene.input.keyboard?.on("keydown-SPACE", this._onAttackKey);
+    // Mobile / React attack button bridge.
+    if (typeof window !== "undefined") {
+      window.addEventListener("phaser-attack", this._onAttackKey);
+    }
+
     if (this.isMobile) {
       this._preventCanvasTouchDefault(scene.game.canvas);
     }
+  }
+
+  private _onAttackKey = () => { this.attackRequested = true; };
+
+  /** Reads and clears the attack request. */
+  consumeAttack(): boolean {
+    if (!this.attackRequested) return false;
+    this.attackRequested = false;
+    return true;
   }
 
   getMovement(): MovementResult {
@@ -61,6 +79,10 @@ export class InputSystem {
 
   destroy() {
     this._touchCleanup?.();
+    this.scene.input.keyboard?.off("keydown-SPACE", this._onAttackKey);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("phaser-attack", this._onAttackKey);
+    }
     this.keys = null;
   }
 

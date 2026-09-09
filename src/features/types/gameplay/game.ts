@@ -10,6 +10,7 @@ import { EquipmentState } from "@/features/types/gameplay/equipment";
 import type { ToolInstance } from "@/features/types/gameplay/tools";
 import type { PlayerStats } from "@/features/types/player-stats";
 import type { EmbeddedQuest } from "@/features/types/quests";
+import type { BowTier } from "@/features/game/bow";
 
 export type Reward = {
   items: { name: InventoryItemName; amount: number }[];
@@ -115,6 +116,11 @@ export type GameState = {
    * Current HP. Restored by eating cooked food.
    */
   hp: number;
+  /**
+   * Equipped bow tier — the player's combat progression track.
+   * Upgraded with gold at the blacksmith.
+   */
+  bowTier?: BowTier;
   fishing: FishingState;
   milestones: Milestones;
   /**

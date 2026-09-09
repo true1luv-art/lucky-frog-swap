@@ -1,7 +1,8 @@
 import Decimal from "decimal.js-light";
 import { Food, FOODS, FOOD_EFFECTS } from "@/features/types/gameplay/craftables";
 import { GameState, InventoryItemName } from "@/features/types/gameplay/game";
-import { INITIAL_HP } from "@/features/game/hp";
+import { INITIAL_HP, getMaxHp } from "@/features/game/hp";
+import { getSkillLevel } from "@/features/game/skills";
 
 export type ConsumeFoodAction = {
   type: "food.consume";
@@ -29,8 +30,9 @@ export function consumeFood({ state, action }: Options): GameState {
   if (countDec.lessThan(action.amount)) throw new Error("Insufficient food to eat");
 
   const effects        = FOOD_EFFECTS[action.item as Food];
+  const maxHp     = getMaxHp(getSkillLevel(state.skills?.cooking ?? 0));
   const currentHp = state.hp ?? INITIAL_HP;
-  const newHp     = Math.min(INITIAL_HP, currentHp + (effects?.hp ?? 0) * action.amount);
+  const newHp     = Math.min(maxHp, currentHp + (effects?.hp ?? 0) * action.amount);
 
   const nextItems = { ...state.items, [action.item]: countDec.sub(action.amount) };
   return {
