@@ -127,12 +127,12 @@ export class ResourceSystem {
       );
     };
 
+    // Axe for trees, pickaxe for stone / ore.
     const actionKey = isTree ? "player_axe" : "player_mine";
-    if (sprite && this.scene.anims.exists(actionKey)) {
-      sprite.play(actionKey, true);
+    if (sprite && playDirectional(sprite, actionKey, facing, true)) {
       sprite.once("animationcomplete", () => {
         applyVisual();
-        if (this.scene.anims.exists("player_idle")) sprite.play("player_idle", true);
+        playDirectional(sprite, "player_idle", facing);
         this.strikeLocked = false;
       });
       return;
