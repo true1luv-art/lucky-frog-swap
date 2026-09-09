@@ -1,6 +1,6 @@
 import type Phaser from 'phaser'
 
-const PLAYER_SPRITES = 'assets/phaser/sprites'
+const PLAYER_SPRITES = 'assets/phaser/sprites/characters'
 const NPC_SPRITES = 'assets/npcs'
 
 /** Loads every NPC spritesheet used by the game and map editor. */

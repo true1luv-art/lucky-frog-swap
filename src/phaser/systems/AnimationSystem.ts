@@ -1,5 +1,6 @@
 import type Phaser from 'phaser'
 import {
+  CHARACTER_ANIMS,
   NPC_ANIMS,
   PLAYER_ANIMS,
   PLAYER_SUPPORT_ANIMS,
@@ -21,6 +22,7 @@ export class AnimationSystem {
   createPlayerAnimations() {
     PLAYER_ANIMS.forEach((config) => this._registerSafe(config))
     PLAYER_SUPPORT_ANIMS.forEach((config) => this._registerSafe(config))
+    CHARACTER_ANIMS.forEach((config) => this._registerSafe(config))
   }
 
   createNpcAnimations() {
