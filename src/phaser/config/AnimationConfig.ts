@@ -36,6 +36,7 @@ export const PLAYER_SUPPORT_ANIMS: AnimationDefinition[] = [
   { key: 'player_shovel',  texture: 'player_shovel',   frames: 13, frameRate: 13, repeat: 0,  rows: 4 },
   { key: 'player_hammer',  texture: 'player_hammer',   frames: 20, frameRate: 20, repeat: 0,  rows: 4 },
   { key: 'player_damage',  texture: 'player_damage',   frames: 8,  frameRate: 8,  repeat: 0,  rows: 4 },
+  { key: 'player_watering',texture: 'player_watering', frames: 5,  frameRate: 8,  repeat: 0,  rows: 4 },
   // death_strip14 is a single-row strip.
   { key: 'player_death',   texture: 'player_death',    frames: 14, frameRate: 14, repeat: 0,  rows: 1 },
 ]

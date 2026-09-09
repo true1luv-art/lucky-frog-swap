@@ -159,7 +159,7 @@ export class FarmingSystem {
     (player as unknown as Record<string, unknown>).facing = facing;
 
     // Pick the tool animation up-front: shovel when the crop is ready to be
-    // harvested, hoe for planting / watering work.
+    // harvested, watering can for a planted-but-dry plot, hoe for planting.
     const currentField = fields[plot.fieldIndex] as Record<string, unknown> | undefined;
     const currentReady = (() => {
       if (!currentField) return false;
@@ -169,7 +169,12 @@ export class FarmingSystem {
       if (!isWatered || wateredAt <= 0 || !cropName) return false;
       return Date.now() >= wateredAt + this.getHarvestMs(cropName);
     })();
-    const actionAnim = currentReady ? "player_shovel" : "player_doing";
+    const needsWater = !!currentField
+      && !!String(currentField.name ?? "")
+      && !Boolean(currentField.isWatered ?? false);
+    const actionAnim = currentReady ? "player_shovel"
+      : needsWater ? "player_watering"
+      : "player_doing";
     sprite.stop();
     playDirectional(sprite, actionAnim, facing, true);
 
