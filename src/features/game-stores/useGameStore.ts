@@ -80,6 +80,7 @@ const INITIAL_FARM: GameState = {
     { id: "pickaxe-wood-default",      name: "Pickaxe",      tier: "Wood", durability: null, maxDurability: null },
     { id: "rod-wood-default",          name: "Rod",          tier: "Wood", durability: null, maxDurability: null },
     { id: "wateringcan-wood-default",  name: "Watering Can", tier: "Wood", durability: null, maxDurability: null },
+    { id: "bow-wood-default",          name: "Bow",          tier: "Wood", durability: null, maxDurability: null },
   ],
   trees:    INITIAL_TREES,
   stones:   INITIAL_STONE,

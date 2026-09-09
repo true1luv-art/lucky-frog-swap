@@ -244,9 +244,10 @@ export class FarmScene extends Phaser.Scene {
     if (this.anims.exists("player_doing")) this.player.sprite.play("player_doing", true);
   }
 
+  /** The bow is a normal inventory tool: it is "equipped" when it is the
+   *  currently selected hotbar item. */
   private _isBowEquipped(): boolean {
-    const gs = window.__gameStore?.getState?.()?.state as Record<string, unknown> | undefined;
-    return gs?.bowEquipped === true;
+    return (window as unknown as { __selectedItem?: string }).__selectedItem === "Bow";
   }
 
   /**
