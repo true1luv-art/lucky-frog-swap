@@ -16,6 +16,8 @@ export interface EnemyConfig {
   aggroRangeTiles: number;
   attackRangeTiles: number;
   attackCooldownMs: number;
+  /** Telegraph time before the hit lands, in ms. */
+  attackWindupMs: number;
   /** Gold dropped on death. */
   goldDrop: number;
   /** Tint applied to the reused player sprite. */
@@ -28,22 +30,28 @@ export const ENEMY_CONFIG: Record<EnemyType, EnemyConfig> = {
   goblin: {
     label: "Goblin",
     hp: 18, damage: 6, speed: 55,
-    aggroRangeTiles: 6, attackRangeTiles: 1, attackCooldownMs: 900,
+    aggroRangeTiles: 6, attackRangeTiles: 1, attackCooldownMs: 1100, attackWindupMs: 320,
     goldDrop: 3, spriteTint: 0x8bd450, respawnSeconds: 12,
   },
   skeleton: {
     label: "Skeleton",
     hp: 30, damage: 10, speed: 42,
-    aggroRangeTiles: 7, attackRangeTiles: 1.2, attackCooldownMs: 1100,
+    aggroRangeTiles: 7, attackRangeTiles: 1.2, attackCooldownMs: 1400, attackWindupMs: 420,
     goldDrop: 6, spriteTint: 0xe8e8e8, respawnSeconds: 18,
   },
   wolf: {
     label: "Wolf",
     hp: 24, damage: 13, speed: 85,
-    aggroRangeTiles: 8, attackRangeTiles: 1.4, attackCooldownMs: 800,
+    aggroRangeTiles: 8, attackRangeTiles: 1.4, attackCooldownMs: 1000, attackWindupMs: 260,
     goldDrop: 8, spriteTint: 0xffa15c, respawnSeconds: 16,
   },
 };
+
+/** Attack state is released only past this multiple of attack range (hysteresis). */
+export const ENEMY_ATTACK_EXIT_FACTOR = 1.35;
+/** Enemies push apart when their feet get closer than this many px. */
+export const ENEMY_SEPARATION_PX = 16;
+
 
 /** Distance from spawn (tiles) at which an enemy gives up the chase. */
 export const ENEMY_LEASH_TILES = 10;
