@@ -151,9 +151,11 @@ export class FarmingSystem {
       return;
     }
 
-    const facingLeft = sprite.x > plot.x + GAME_CONFIG.TILE_SIZE / 2;
-    sprite.setFlipX(facingLeft);
-    (player as unknown as Record<string, unknown>).facing = facingLeft ? "left" : "right";
+    const facing = facingFromVector(
+      plot.x + GAME_CONFIG.TILE_SIZE / 2 - sprite.x,
+      plot.y + GAME_CONFIG.TILE_SIZE / 2 - sprite.y,
+    );
+    (player as unknown as Record<string, unknown>).facing = facing;
 
     // Pick the tool animation up-front: shovel when the crop is ready to be
     // harvested, hoe for planting / watering work.
