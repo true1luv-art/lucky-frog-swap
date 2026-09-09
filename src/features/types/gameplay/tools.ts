@@ -11,7 +11,7 @@
  * Each tool is crafted from 3 of its matching ingot only — no mixing.
  */
 
-export type ToolName = "Axe" | "Pickaxe" | "Rod" | "Watering Can";
+export type ToolName = "Axe" | "Pickaxe" | "Rod" | "Watering Can" | "Bow";
 
 /** Tiers that map to ore types (plus Wood as the free starter). */
 export type ToolTier = "Wood" | "Iron" | "Silver" | "Emerald" | "Diamond" | "Ignisite";
