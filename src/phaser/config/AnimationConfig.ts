@@ -29,6 +29,8 @@ export const PLAYER_ANIMS: AnimationDefinition[] = [
 ]
 
 export const PLAYER_SUPPORT_ANIMS: AnimationDefinition[] = [
+  { key: 'player_bow',     texture: 'player_bow',     frames: 6,  frameRate: 12, repeat: 0,  rows: 4 },
+  { key: 'player_sword',   texture: 'player_sword',   frames: 9,  frameRate: 14, repeat: 0,  rows: 4 },
   { key: 'player_waiting', texture: 'player_fishidle', frames: 10, frameRate: 10, repeat: -1, rows: 4 },
   { key: 'player_reeling', texture: 'player_reel',     frames: 10, frameRate: 10, repeat: 0,  rows: 4 },
   { key: 'player_shovel',  texture: 'player_shovel',   frames: 13, frameRate: 13, repeat: 0,  rows: 4 },
