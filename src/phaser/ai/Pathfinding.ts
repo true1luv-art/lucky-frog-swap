@@ -46,9 +46,18 @@ const key = (x: number, y: number) => `${x},${y}`;
  * through `goal`, or an empty array when no route exists.
  */
 export function findPath(start: TilePoint, goal: TilePoint, opts: PathfindOptions): TilePoint[] {
-  const { isBlocked, allowDiagonal = true, maxNodes = 900 } = opts;
+  const { isBlocked, allowDiagonal = true, maxNodes = 2500 } = opts;
   if (start.x === goal.x && start.y === goal.y) return [];
-  if (isBlocked(goal.x, goal.y)) return [];
+  // The player can stand on a tile the enemy cannot enter (edges, corners).
+  // Aim for the closest tile it *can* reach instead of giving up.
+  let target = goal;
+  if (isBlocked(target.x, target.y)) {
+    const alt = nearestWalkable(goal, isBlocked);
+    if (!alt) return [];
+    target = alt;
+    if (start.x === target.x && start.y === target.y) return [];
+  }
+  goal = target;
 
   const neighbours = allowDiagonal ? [...STRAIGHT, ...DIAGONAL] : STRAIGHT;
   const open: Array<{ tile: TilePoint; f: number }> = [{ tile: start, f: 0 }];
@@ -153,6 +162,25 @@ export function nextWaypoint(
       continue;
     }
     return target;
+  }
+  return null;
+}
+
+/** Closest walkable tile to `tile` within a small ring search. */
+export function nearestWalkable(
+  tile: TilePoint,
+  isBlocked: (tileX: number, tileY: number) => boolean,
+  maxRadius = 3,
+): TilePoint | null {
+  for (let r = 1; r <= maxRadius; r++) {
+    for (let dx = -r; dx <= r; dx++) {
+      for (let dy = -r; dy <= r; dy++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        const x = tile.x + dx;
+        const y = tile.y + dy;
+        if (!isBlocked(x, y)) return { x, y };
+      }
+    }
   }
   return null;
 }

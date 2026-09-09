@@ -60,6 +60,10 @@ export class EnemySystem {
   private respawnAt = new Map<string, number>();
   /** enemy id → cached A* route while chasing */
   private paths = new Map<string, ChasePath>();
+  /** enemy id → last known position, for stuck detection */
+  private progress = new Map<string, { x: number; y: number; at: number }>();
+  /** enemy id → temporary sidestep target while unsticking */
+  private detours = new Map<string, { x: number; y: number; until: number }>();
 
   constructor(scene: Phaser.Scene, opts: EnemySystemOptions) {
     this.scene = scene;
@@ -100,11 +104,15 @@ export class EnemySystem {
       enemy.drawHpBar();
     }
     this.paths.clear();
+    this.progress.clear();
+    this.detours.clear();
   }
 
   handleDeath(enemy: Enemy) {
     if (enemy.dying) return;
     this.paths.delete(enemy.id);
+    this.progress.delete(enemy.id);
+    this.detours.delete(enemy.id);
     enemy.dying = true;
     enemy.hpBar.clear();
     (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
@@ -241,23 +249,67 @@ export class EnemySystem {
   private chaseStep(
     enemy: Enemy, ex: number, ey: number, px: number, py: number, now: number,
   ): { x: number; y: number } {
+    const stuck = this.trackStuck(enemy, ex, ey, now);
     const isBlocked = this.opts.isTileBlocked;
     if (!isBlocked) return { x: px, y: py };
 
+    // Sliding along a wall for a moment: commit to a sidestep so the enemy
+    // never grinds against the same corner forever.
+    const detour = this.detours.get(enemy.id);
+    if (detour && now < detour.until) return { x: detour.x, y: detour.y };
+
     const from = toTile(ex, ey);
     const to = toTile(px, py);
-    if (hasLineOfSight(from, to, isBlocked)) {
+    if (!stuck && hasLineOfSight(from, to, isBlocked)) {
       this.paths.delete(enemy.id);
       return { x: px, y: py };
     }
 
     let path = this.paths.get(enemy.id);
-    if (!path || now >= path.repathAt || path.tiles.length === 0) {
+    if (stuck || !path || now >= path.repathAt || path.tiles.length === 0) {
       path = { tiles: findPath(from, to, { isBlocked }), repathAt: now + REPATH_INTERVAL_MS };
       this.paths.set(enemy.id, path);
     }
 
-    return nextWaypoint(path.tiles, ex, ey) ?? { x: px, y: py };
+    const waypoint = nextWaypoint(path.tiles, ex, ey, 6);
+    if (waypoint) return waypoint;
+
+    if (stuck) {
+      // No route at all — slide perpendicular to the player direction.
+      const dx = px - ex;
+      const dy = py - ey;
+      const len = Math.hypot(dx, dy) || 1;
+      const side = Math.random() < 0.5 ? 1 : -1;
+      const spot = {
+        x: ex + (-dy / len) * TS * 2 * side,
+        y: ey + (dx / len) * TS * 2 * side,
+        until: now + 700,
+      };
+      this.detours.set(enemy.id, spot);
+      return { x: spot.x, y: spot.y };
+    }
+
+    return { x: px, y: py };
+  }
+
+  /**
+   * True when the enemy has barely moved while trying to chase — the signal
+   * that its current route is useless and needs to be thrown away.
+   */
+  private trackStuck(enemy: Enemy, ex: number, ey: number, now: number): boolean {
+    const prev = this.progress.get(enemy.id);
+    if (!prev) {
+      this.progress.set(enemy.id, { x: ex, y: ey, at: now });
+      return false;
+    }
+    if (Math.hypot(ex - prev.x, ey - prev.y) > 3) {
+      this.progress.set(enemy.id, { x: ex, y: ey, at: now });
+      return false;
+    }
+    if (now - prev.at < 350) return false;
+    this.progress.set(enemy.id, { x: ex, y: ey, at: now });
+    this.paths.delete(enemy.id);
+    return true;
   }
 
   private separate() {
@@ -317,6 +369,8 @@ export class EnemySystem {
     this.enemies = [];
     this.respawnAt.clear();
     this.paths.clear();
+    this.progress.clear();
+    this.detours.clear();
     this.enemyGroup?.clear(true, true);
   }
 }

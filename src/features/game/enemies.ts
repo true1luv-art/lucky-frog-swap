@@ -53,5 +53,14 @@ export const ENEMY_ATTACK_EXIT_FACTOR = 1.35;
 export const ENEMY_SEPARATION_PX = 16;
 
 
-/** Distance from spawn (tiles) at which an enemy gives up the chase. */
+/**
+ * Distance from spawn (tiles) an enemy may wander/return within.
+ * This no longer cuts a chase short — see ENEMY_DEAGGRO_FACTOR.
+ */
 export const ENEMY_LEASH_TILES = 10;
+
+/**
+ * While chasing, an enemy only gives up once the player is this multiple of
+ * its aggro range away. Chases are driven by the player, not the spawn point.
+ */
+export const ENEMY_DEAGGRO_FACTOR = 2.2;
