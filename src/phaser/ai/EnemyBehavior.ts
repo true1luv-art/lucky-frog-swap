@@ -24,6 +24,8 @@ export interface BehaviorInput {
   distSpawn: number;
   /** True while a telegraphed swing is still resolving. */
   winding: boolean;
+  /** True while the enemy is provoked (recently damaged by the player). */
+  provoked: boolean;
 }
 
 export interface BehaviorResult {
