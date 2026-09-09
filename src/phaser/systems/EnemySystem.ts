@@ -65,6 +65,7 @@ export class EnemySystem {
       (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
       enemy.hp = enemy.maxHp;
       enemy.state = "idle";
+      enemy.windupUntil = 0;
       enemy.drawHpBar();
     }
   }
