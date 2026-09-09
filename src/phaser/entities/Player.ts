@@ -1,5 +1,6 @@
 import type Phaser from "phaser";
 import { GAME_CONFIG, PLAYER_CONFIG } from "@/phaser/config/GameConfig";
+import { DEFAULT_FACING, playDirectional } from "@/phaser/systems/DirectionalAnimation";
 
 /**
  * Movement vector produced by InputSystem each frame.
@@ -36,14 +37,8 @@ export class Player {
       movement.vx,
       movement.vy,
     );
-    // Only call setFlipX when the value changes to prevent per-frame flicker
-    // on pure up/down movement.
-    if (
-      typeof movement.flipX === "boolean" &&
-      this.sprite.flipX !== movement.flipX
-    ) {
-      this.sprite.setFlipX(movement.flipX);
-    }
+    // Sheets carry dedicated left/right rows, so flipping is never needed.
+    if (this.sprite.flipX) this.sprite.setFlipX(false);
     this.facing = movement.facing;
   }
 
@@ -72,8 +67,8 @@ export function createPlayer(
     .setSize(PLAYER_CONFIG.BODY_SIZE.width, PLAYER_CONFIG.BODY_SIZE.height)
     .setOffset(PLAYER_CONFIG.BODY_OFFSET.x, PLAYER_CONFIG.BODY_OFFSET.y);
 
-  if (textureKey === "player_idle" && scene.anims.exists("player_idle")) {
-    sprite.play("player_idle");
+  if (textureKey === "player_idle") {
+    playDirectional(sprite, "player_idle", DEFAULT_FACING);
   } else if (textureKey === "__DEFAULT") {
     sprite.setDisplaySize(16, 24).setTint(0x44bb66);
   }
