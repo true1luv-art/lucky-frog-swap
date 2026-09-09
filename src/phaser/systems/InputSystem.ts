@@ -69,6 +69,16 @@ export class InputSystem {
 
   private _onAttackKey = () => { this.attackRequested = true; };
 
+  private _onPointerMove = (pointer: Phaser.Input.Pointer) => {
+    this.aim = { x: pointer.worldX, y: pointer.worldY };
+  };
+
+  private _onPointerDown = (pointer: Phaser.Input.Pointer) => {
+    if (!pointer.leftButtonDown()) return;
+    this.aim = { x: pointer.worldX, y: pointer.worldY };
+    this.attackRequested = true;
+  };
+
   /** Reads and clears the attack request. */
   consumeAttack(): boolean {
     if (!this.attackRequested) return false;
@@ -85,6 +95,8 @@ export class InputSystem {
   destroy() {
     this._touchCleanup?.();
     this.scene.input.keyboard?.off("keydown-SPACE", this._onAttackKey);
+    this.scene.input.off("pointermove", this._onPointerMove);
+    this.scene.input.off("pointerdown", this._onPointerDown);
     if (typeof window !== "undefined") {
       window.removeEventListener("phaser-attack", this._onAttackKey);
     }
