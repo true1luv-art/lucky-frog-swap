@@ -99,10 +99,12 @@ export class EnemySystem {
       enemy.windupUntil = 0;
       enemy.drawHpBar();
     }
+    this.paths.clear();
   }
 
   handleDeath(enemy: Enemy) {
     if (enemy.dying) return;
+    this.paths.delete(enemy.id);
     enemy.dying = true;
     enemy.hpBar.clear();
     (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
