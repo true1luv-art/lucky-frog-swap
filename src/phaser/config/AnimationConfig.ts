@@ -8,33 +8,26 @@ export interface AnimationDefinition {
   skipMissedFrames?: boolean
 }
 
+/**
+ * Player uses the 80×80 character pack. Every sheet has 4 rows; row 0
+ * (frames 0 … n-1) is the animation played, matching frame-rate to frame-count.
+ */
 export const PLAYER_ANIMS: AnimationDefinition[] = [
-  { key: 'player_idle',    texture: 'player_idle',    frames: 9,  frameRate: 9,  repeat: -1 },
-  { key: 'player_walk',    texture: 'player_walk',    frames: 8,  frameRate: 8,  repeat: -1 },
+  { key: 'player_idle',    texture: 'player_idle',    frames: 6,  frameRate: 6,  repeat: -1 },
+  { key: 'player_walk',    texture: 'player_walk',    frames: 6,  frameRate: 8,  repeat: -1 },
   { key: 'player_mine',    texture: 'player_mine',    frames: 10, frameRate: 10, repeat:  0 },
   { key: 'player_axe',     texture: 'player_axe',     frames: 10, frameRate: 10, repeat:  0 },
-  { key: 'player_doing',   texture: 'player_doing',   frames: 8,  frameRate: 8,  repeat:  0 },
-  { key: 'player_casting', texture: 'player_casting', frames: 15, frameRate: 10, repeat:  0 },
+  { key: 'player_doing',   texture: 'player_doing',   frames: 18, frameRate: 18, repeat:  0 },
+  { key: 'player_casting', texture: 'player_casting', frames: 15, frameRate: 15, repeat:  0 },
   { key: 'player_caught',  texture: 'player_caught',  frames: 10, frameRate: 10, repeat:  0 },
 ]
 
 export const PLAYER_SUPPORT_ANIMS: AnimationDefinition[] = [
-  { key: 'player_waiting', texture: 'player_idle', frames: 9, frameRate: 4, repeat: -1 },
-  { key: 'player_reeling', texture: 'player_casting', frames: 15, frameRate: 10, repeat: 0 },
-]
-
-/**
- * New 80x80 character pack (4 rows per sheet).
- * Row 0 is used here; other rows stay available on the texture.
- */
-export const CHARACTER_ANIMS: AnimationDefinition[] = [
-  { key: 'char_axe',              texture: 'char_axe',              frames: 10, frameRate: 10, repeat: 0 },
-  { key: 'char_damage',           texture: 'char_damage',           frames: 8,  frameRate: 8,  repeat: 0 },
-  { key: 'char_death',            texture: 'char_death',            frames: 14, frameRate: 14, repeat: 0 },
-  { key: 'char_fishing_casting',  texture: 'char_fishing_casting',  frames: 15, frameRate: 15, repeat: 0 },
-  { key: 'char_fishing_catching', texture: 'char_fishing_catching', frames: 10, frameRate: 10, repeat: 0 },
-  { key: 'char_fishing_idle',     texture: 'char_fishing_idle',     frames: 10, frameRate: 10, repeat: -1 },
-  { key: 'char_fishing_reeling',  texture: 'char_fishing_reeling',  frames: 10, frameRate: 10, repeat: 0 },
+  { key: 'player_waiting', texture: 'player_fishidle', frames: 10, frameRate: 10, repeat: -1 },
+  { key: 'player_reeling', texture: 'player_reel',     frames: 10, frameRate: 10, repeat: 0 },
+  { key: 'player_shovel',  texture: 'player_shovel',   frames: 13, frameRate: 13, repeat: 0 },
+  { key: 'player_damage',  texture: 'player_damage',   frames: 8,  frameRate: 8,  repeat: 0 },
+  { key: 'player_death',   texture: 'player_death',    frames: 14, frameRate: 14, repeat: 0 },
 ]
 
 export const NPC_ANIMS: AnimationDefinition[] = [
