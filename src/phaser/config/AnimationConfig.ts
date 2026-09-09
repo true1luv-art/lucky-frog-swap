@@ -23,6 +23,20 @@ export const PLAYER_SUPPORT_ANIMS: AnimationDefinition[] = [
   { key: 'player_reeling', texture: 'player_casting', frames: 15, frameRate: 10, repeat: 0 },
 ]
 
+/**
+ * New 80x80 character pack (4 rows per sheet).
+ * Row 0 is used here; other rows stay available on the texture.
+ */
+export const CHARACTER_ANIMS: AnimationDefinition[] = [
+  { key: 'char_axe',              texture: 'char_axe',              frames: 10, frameRate: 10, repeat: 0 },
+  { key: 'char_damage',           texture: 'char_damage',           frames: 8,  frameRate: 8,  repeat: 0 },
+  { key: 'char_death',            texture: 'char_death',            frames: 14, frameRate: 14, repeat: 0 },
+  { key: 'char_fishing_casting',  texture: 'char_fishing_casting',  frames: 15, frameRate: 15, repeat: 0 },
+  { key: 'char_fishing_catching', texture: 'char_fishing_catching', frames: 10, frameRate: 10, repeat: 0 },
+  { key: 'char_fishing_idle',     texture: 'char_fishing_idle',     frames: 10, frameRate: 10, repeat: -1 },
+  { key: 'char_fishing_reeling',  texture: 'char_fishing_reeling',  frames: 10, frameRate: 10, repeat: 0 },
+]
+
 export const NPC_ANIMS: AnimationDefinition[] = [
   { key: 'npc_idle', texture: 'npc_base', frames: 9, frameRate: 6, repeat: -1 },
   { key: 'npc_rancher_idle', texture: 'npc_rancher', frames: 9, frameRate: 9, repeat: -1 },
