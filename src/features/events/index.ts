@@ -78,7 +78,8 @@ export type GameAction =
   | PlayerHurtAction
   | PlayerDiedAction
   | EnemyDefeatedAction
-  | BowUpgradeAction;
+  | BowUpgradeAction
+  | BowEquipAction;
 
 export interface GameEvent {
   action: GameAction;
@@ -152,6 +153,7 @@ import {
   playerDied,
   enemyDefeated,
   bowUpgrade,
+  bowEquip,
 } from "@/features/events/combat/combat";
 
 export function processGameEvent(state: GameState, event: GameEvent): GameState {
@@ -222,6 +224,8 @@ export function processGameEvent(state: GameState, event: GameEvent): GameState 
         return enemyDefeated({ state, action });
       case "bow.upgrade":
         return bowUpgrade({ state, action });
+      case "bow.equip":
+        return bowEquip({ state, action });
       default:
         return state;
     }
