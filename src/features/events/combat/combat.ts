@@ -67,7 +67,12 @@ export function bowUpgrade({
   const cost = new Decimal(BOW_TIER[action.tier].goldCost);
   const coins = state.coins ?? new Decimal(0);
   if (coins.lessThan(cost)) throw new Error("Not enough gold");
-  return { ...state, coins: coins.sub(cost), bowTier: action.tier };
+  // Keep the inventory Bow tool in step with the purchased tier so the
+  // hotbar icon reflects the upgrade.
+  const tools = (state.tools ?? []).map((tool) =>
+    tool.name === "Bow" ? { ...tool, tier: action.tier } : tool,
+  );
+  return { ...state, coins: coins.sub(cost), bowTier: action.tier, tools };
 }
 
 /** Equip / unequip the bow. Only an equipped bow can be aimed and fired. */

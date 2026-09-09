@@ -10,7 +10,6 @@ import { Hud }                  from "@/features/game-components/hud/Hud";
 import { PhaserModals }         from "@/features/game-components/PhaserModals";
 import { MobileJoystick }       from "@/phaser/ui/MobileJoystick";
 import { MobileActionButton }   from "@/phaser/ui/MobileActionButton";
-import { BowToolButton }        from "@/phaser/ui/BowToolButton";
 import { hydratGameSettings } from "@/features/game-stores/useGameSettings";
 
 import { InnerPanel }           from "@/components/ui/Panel";
@@ -734,7 +733,6 @@ export default function PhaserCanvas() {
                 <Hud wallet={wallet} />
                 <MobileJoystick />
                 <MobileActionButton />
-                <BowToolButton />
                 <PlotPopover />
                 <ResourceDropFloater />
                 <NodeTooltip />
