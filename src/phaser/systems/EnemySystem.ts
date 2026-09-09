@@ -157,7 +157,7 @@ export class EnemySystem {
           const reached = this.moveTo(enemy, enemy.targetX, enemy.targetY, cfg.speed * 0.5);
           if (reached) {
             enemy.state = "idle";
-            enemy.nextWanderAt = now + 1000 + Math.random() * 2000;
+            enemy.nextWanderAt = now + nextWanderDelay();
           }
           break;
         }
