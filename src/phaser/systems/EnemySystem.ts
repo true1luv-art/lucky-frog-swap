@@ -146,10 +146,9 @@ export class EnemySystem {
         case "idle": {
           this.stop(enemy);
           if (now >= enemy.nextWanderAt) {
-            const angle = Math.random() * Math.PI * 2;
-            const radius = TS * (1 + Math.random() * 3);
-            enemy.targetX = enemy.spawnX + Math.cos(angle) * radius;
-            enemy.targetY = enemy.spawnY + Math.sin(angle) * radius;
+            const spot = pickWanderTarget(enemy.spawnX, enemy.spawnY);
+            enemy.targetX = spot.x;
+            enemy.targetY = spot.y;
             enemy.state = "wander";
           }
           break;
