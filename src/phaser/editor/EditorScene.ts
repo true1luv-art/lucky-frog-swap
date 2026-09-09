@@ -49,6 +49,8 @@ const ANIMAL_MAX: Record<AnimalKind, number> = { chicken: 10, cow: 5, sheep: 5 }
 interface MarkerEntry extends EditorMarker {
   sprite: Phaser.GameObjects.Image | Phaser.GameObjects.Sprite | Phaser.GameObjects.Rectangle;
   outline: Phaser.GameObjects.Rectangle;
+  /** NPC sprites keep their native frame size and sit centred on the marker box. */
+  nativeSprite?: boolean;
 }
 
 interface EditorAnimal {
@@ -169,13 +171,13 @@ export class EditorScene extends Phaser.Scene {
       const animatedNpc = group === "npcs" && npcTexture.startsWith("npc_") && this.textures.exists(npcTexture);
       const sprite = animatedNpc
         ? createNpcSprite(this, {
-            x: px,
-            y: py,
+            x: px + (w * TILE) / 2,
+            y: py + (h * TILE) / 2,
             width: w * TILE,
             height: h * TILE,
             texture: npcTexture,
             facing,
-            origin: 0,
+            origin: 0.5,
           })
         : texture && this.textures.exists(texture)
           ? this.add.image(px, py, texture).setOrigin(0, 0).setDisplaySize(w * TILE, h * TILE)
@@ -198,6 +200,7 @@ export class EditorScene extends Phaser.Scene {
         h,
         sprite,
         outline,
+        nativeSprite: animatedNpc,
       };
       sprite.setInteractive({ useHandCursor: true });
       sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
@@ -226,8 +229,14 @@ export class EditorScene extends Phaser.Scene {
   private syncMarker(entry: MarkerEntry): void {
     const px = entry.x * TILE;
     const py = entry.y * TILE;
-    entry.sprite.setPosition(px, py);
-    if (entry.sprite instanceof Phaser.GameObjects.Image || entry.sprite instanceof Phaser.GameObjects.Sprite) {
+    if (entry.nativeSprite) {
+      entry.sprite.setPosition(px + (entry.w * TILE) / 2, py + (entry.h * TILE) / 2);
+    } else {
+      entry.sprite.setPosition(px, py);
+    }
+    if (entry.nativeSprite) {
+      // keep native sprite scale — no stretching to the marker box
+    } else if (entry.sprite instanceof Phaser.GameObjects.Image || entry.sprite instanceof Phaser.GameObjects.Sprite) {
       entry.sprite.setDisplaySize(entry.w * TILE, entry.h * TILE);
     } else {
       entry.sprite.setSize(entry.w * TILE, entry.h * TILE);
