@@ -1,11 +1,21 @@
 import Phaser from "phaser";
 import { GAME_CONFIG, PLAYER_CONFIG } from "@/phaser/config/GameConfig";
 import { Enemy } from "@/phaser/entities/Enemy";
+import { ENEMY_SEPARATION_PX } from "@/features/game/enemies";
 import {
-  ENEMY_LEASH_TILES,
-  ENEMY_ATTACK_EXIT_FACTOR,
-  ENEMY_SEPARATION_PX,
-} from "@/features/game/enemies";
+  canStartAttack,
+  decideEnemyState,
+  nextWanderDelay,
+  pickWanderTarget,
+  shouldAttackConnect,
+} from "@/phaser/ai/EnemyBehavior";
+import {
+  findPath,
+  hasLineOfSight,
+  nextWaypoint,
+  toTile,
+  type TilePoint,
+} from "@/phaser/ai/Pathfinding";
 import { ENEMY_SPAWN_POINTS, type EnemySpawnPoint } from "@/phaser/positions/enemySpawnPoints";
 import {
   animBase,
@@ -22,7 +32,20 @@ interface EnemySystemOptions {
   onPlayerHit: (damage: number) => void;
   /** Called once per enemy death, after the reward should be granted. */
   onEnemyKilled: (enemy: Enemy) => void;
+  /**
+   * Optional walkability test used by the A* chase pathing.
+   * When omitted, enemies chase in a straight line as before.
+   */
+  isTileBlocked?: (tileX: number, tileY: number) => boolean;
 }
+
+interface ChasePath {
+  tiles: TilePoint[];
+  repathAt: number;
+}
+
+/** How often a chasing enemy is allowed to recompute its route. */
+const REPATH_INTERVAL_MS = 500;
 
 /**
  * EnemySystem — spawning, respawning, and the per-enemy AI state machine:
@@ -35,6 +58,8 @@ export class EnemySystem {
   private enemies: Enemy[] = [];
   /** spawn point id → epoch ms when it may spawn again */
   private respawnAt = new Map<string, number>();
+  /** enemy id → cached A* route while chasing */
+  private paths = new Map<string, ChasePath>();
 
   constructor(scene: Phaser.Scene, opts: EnemySystemOptions) {
     this.scene = scene;
@@ -74,10 +99,12 @@ export class EnemySystem {
       enemy.windupUntil = 0;
       enemy.drawHpBar();
     }
+    this.paths.clear();
   }
 
   handleDeath(enemy: Enemy) {
     if (enemy.dying) return;
+    this.paths.delete(enemy.id);
     enemy.dying = true;
     enemy.hpBar.clear();
     (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
@@ -130,38 +157,22 @@ export class EnemySystem {
         enemy.sprite.x, enemy.sprite.y, enemy.spawnX, enemy.spawnY,
       );
 
-      // ── Decide state ───────────────────────────────────────────────────
-      const attackRange = cfg.attackRangeTiles * TS;
+      // ── Decide state (see phaser/ai/EnemyBehavior) ─────────────────────
       const winding = enemy.windupUntil > 0;
-
-      if (distSpawn > ENEMY_LEASH_TILES * TS) {
-        enemy.state = "return";
-        enemy.windupUntil = 0;
-      } else if (winding) {
-        enemy.state = "attack";
-      } else if (distPlayer <= attackRange) {
-        enemy.state = "attack";
-      } else if (
-        enemy.state === "attack" &&
-        distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR
-      ) {
-        // Hysteresis — hold the attack stance instead of flickering back to chase.
-        enemy.state = "attack";
-      } else if (distPlayer <= cfg.aggroRangeTiles * TS) {
-        enemy.state = "chase";
-      } else if (enemy.state === "chase" || enemy.state === "attack") {
-        enemy.state = "return";
-      }
+      const decision = decideEnemyState({
+        config: cfg, state: enemy.state, distPlayer, distSpawn, winding,
+      });
+      enemy.state = decision.state;
+      if (decision.cancelWindup) enemy.windupUntil = 0;
 
       // ── Act ────────────────────────────────────────────────────────────
       switch (enemy.state) {
         case "idle": {
           this.stop(enemy);
           if (now >= enemy.nextWanderAt) {
-            const angle = Math.random() * Math.PI * 2;
-            const radius = TS * (1 + Math.random() * 3);
-            enemy.targetX = enemy.spawnX + Math.cos(angle) * radius;
-            enemy.targetY = enemy.spawnY + Math.sin(angle) * radius;
+            const spot = pickWanderTarget(enemy.spawnX, enemy.spawnY);
+            enemy.targetX = spot.x;
+            enemy.targetY = spot.y;
             enemy.state = "wander";
           }
           break;
@@ -170,12 +181,15 @@ export class EnemySystem {
           const reached = this.moveTo(enemy, enemy.targetX, enemy.targetY, cfg.speed * 0.5);
           if (reached) {
             enemy.state = "idle";
-            enemy.nextWanderAt = now + 1000 + Math.random() * 2000;
+            enemy.nextWanderAt = now + nextWanderDelay();
           }
           break;
         }
         case "chase": {
-          this.moveTo(enemy, px + (enemy.sprite.x - ex), py + (enemy.sprite.y - ey), cfg.speed);
+          const offX = enemy.sprite.x - ex;
+          const offY = enemy.sprite.y - ey;
+          const step = this.chaseStep(enemy, ex, ey, px, py, now);
+          this.moveTo(enemy, step.x + offX, step.y + offY, cfg.speed);
           break;
         }
         case "return": {
@@ -195,14 +209,11 @@ export class EnemySystem {
             // still inside reach when the blow actually lands.
             if (now >= enemy.windupUntil) {
               enemy.windupUntil = 0;
-              if (distPlayer <= attackRange * ENEMY_ATTACK_EXIT_FACTOR) {
+              if (shouldAttackConnect(cfg, distPlayer)) {
                 this.opts.onPlayerHit(cfg.damage);
               }
             }
-          } else if (
-            distPlayer <= attackRange &&
-            now - enemy.lastAttackAt >= cfg.attackCooldownMs
-          ) {
+          } else if (canStartAttack(cfg, distPlayer, enemy.lastAttackAt, now)) {
             enemy.lastAttackAt = now;
             enemy.windupUntil = now + cfg.attackWindupMs;
             this.playOnce(enemy, "player_sword");
@@ -222,6 +233,33 @@ export class EnemySystem {
    * Keeps enemies from stacking into a single sprite when several chase the
    * player, so each one stays individually readable and hittable.
    */
+  /**
+   * Where a chasing enemy should head this frame: straight at the player when
+   * it has a clear line, otherwise the next waypoint of an A* route around
+   * whatever is in the way.
+   */
+  private chaseStep(
+    enemy: Enemy, ex: number, ey: number, px: number, py: number, now: number,
+  ): { x: number; y: number } {
+    const isBlocked = this.opts.isTileBlocked;
+    if (!isBlocked) return { x: px, y: py };
+
+    const from = toTile(ex, ey);
+    const to = toTile(px, py);
+    if (hasLineOfSight(from, to, isBlocked)) {
+      this.paths.delete(enemy.id);
+      return { x: px, y: py };
+    }
+
+    let path = this.paths.get(enemy.id);
+    if (!path || now >= path.repathAt || path.tiles.length === 0) {
+      path = { tiles: findPath(from, to, { isBlocked }), repathAt: now + REPATH_INTERVAL_MS };
+      this.paths.set(enemy.id, path);
+    }
+
+    return nextWaypoint(path.tiles, ex, ey) ?? { x: px, y: py };
+  }
+
   private separate() {
     const living = this.enemies.filter((e) => !e.dying);
     for (let i = 0; i < living.length; i++) {
@@ -278,6 +316,7 @@ export class EnemySystem {
     for (const enemy of this.enemies) enemy.destroy();
     this.enemies = [];
     this.respawnAt.clear();
+    this.paths.clear();
     this.enemyGroup?.clear(true, true);
   }
 }
