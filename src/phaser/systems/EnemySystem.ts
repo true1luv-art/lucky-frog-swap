@@ -25,7 +25,20 @@ interface EnemySystemOptions {
   onPlayerHit: (damage: number) => void;
   /** Called once per enemy death, after the reward should be granted. */
   onEnemyKilled: (enemy: Enemy) => void;
+  /**
+   * Optional walkability test used by the A* chase pathing.
+   * When omitted, enemies chase in a straight line as before.
+   */
+  isTileBlocked?: (tileX: number, tileY: number) => boolean;
 }
+
+interface ChasePath {
+  tiles: TilePoint[];
+  repathAt: number;
+}
+
+/** How often a chasing enemy is allowed to recompute its route. */
+const REPATH_INTERVAL_MS = 500;
 
 /**
  * EnemySystem — spawning, respawning, and the per-enemy AI state machine:
