@@ -11,7 +11,7 @@ export type ItemType =
   | "resource"   // Wood, Stone, Coal
   | "ore"        // Iron, Silver, Emerald, Diamond, Ignisite
   | "ingot"      // Iron Ingot … Ignisite Ingot
-  | "crop"       // Potato, Carrot, Cabbage, Pumpkin, Wheat
+  | "crop"       // Potato, Carrot, Cabbage, Wheat
   | "seed"       // Potato Seed … Wheat Seed
   | "food"       // Baked Potato, Cooked Fish, Carrot Stew, …
   | "fish"       // Fish

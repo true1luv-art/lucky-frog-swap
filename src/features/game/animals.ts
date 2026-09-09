@@ -6,7 +6,7 @@
  * Feed assignments:
  *   Chicken — eats Carrot (1x)
  *   Cow     — eats Wheat (1x)
- *   Sheep   — eats Wheat (1x)
+ *   Sheep   — eats Cabbage (1x)
  *
  * Gold prices match ANIMALS in craftables.ts: Chicken 10, Cow 40, Sheep 25.
  */
@@ -56,7 +56,7 @@ export const ANIMALS_CONFIG: Record<AnimalType, AnimalConfig> = {
   },
   Sheep: {
     type: "Sheep",
-    feedItem: "Wheat",
+    feedItem: "Cabbage",
     feedAmount: 1,
     produceItem: "Wool",
     produceTimeMs:   12 * 60 * 60 * 1_000, // 12 hours

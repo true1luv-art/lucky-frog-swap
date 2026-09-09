@@ -105,16 +105,14 @@ export const FARM_LEVEL_GATES: Record<number, FarmLevelGate> = {
   },
   3: {},
   4: {
-    seeds:   ["Pumpkin Seed"],
     animals: ["Cow"],
-    recipes: ["Pumpkin Soup", "Scrambled Eggs"],
+    recipes: ["Scrambled Eggs"],
   },
   5: {},
   6: {
     plotRange: [48, 71],
     seeds:     ["Wheat Seed"],
     animals:   ["Sheep"],
-    recipes:   ["Pumpkin Pie"],
   },
   7: {
     recipes: ["Wheat Bread"],

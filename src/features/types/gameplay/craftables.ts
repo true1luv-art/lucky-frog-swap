@@ -90,7 +90,7 @@ export type Craftable = {
 };
 
 /**
- * Food names — 8 total.
+ * Food names — 6 total.
  * "Baked Potato" and "Cooked Fish" are always available (free defaults).
  * The other 6 require a one-time Gold unlock at the Kitchen.
  */
@@ -99,10 +99,8 @@ export type Food =
   | "Cooked Fish"
   | "Cabbage Roll"
   | "Carrot Stew"
-  | "Pumpkin Soup"
   | "Scrambled Eggs"
-  | "Wheat Bread"
-  | "Pumpkin Pie";
+  | "Wheat Bread";
 
 export type Animal = "Chicken" | "Cow" | "Sheep";
 
@@ -145,14 +143,6 @@ export const FOODS: () => Record<Food, Craftable> = () => ({
       { item: "Carrot", amount: new Decimal(3) },
     ],
   },
-  "Pumpkin Soup": {
-    name: "Pumpkin Soup",
-    description: "Creamy autumn flavor. Restores 40 HP.",
-    ingredients: [
-      { item: "Pumpkin", amount: new Decimal(3) },
-      { item: "Cabbage", amount: new Decimal(1) },
-    ],
-  },
   "Scrambled Eggs": {
     name: "Scrambled Eggs",
     description: "Fluffy eggs. Restores 35 HP.",
@@ -168,15 +158,6 @@ export const FOODS: () => Record<Food, Craftable> = () => ({
       { item: "Milk",  amount: new Decimal(1) },
     ],
   },
-  "Pumpkin Pie": {
-    name: "Pumpkin Pie",
-    description: "Sweet and golden. Restores 60 HP.",
-    ingredients: [
-      { item: "Pumpkin", amount: new Decimal(3) },
-      { item: "Egg",     amount: new Decimal(2) },
-      { item: "Milk",    amount: new Decimal(1) },
-    ],
-  },
 });
 
 /**
@@ -188,20 +169,16 @@ export const FOODS: () => Record<Food, Craftable> = () => ({
  * | Cooked Fish    |  10     |
  * | Cabbage Roll   |  25     |
  * | Carrot Stew    |  30     |
- * | Pumpkin Soup   |  40     |
  * | Scrambled Eggs |  35     |
  * | Wheat Bread    |  50     |
- * | Pumpkin Pie    |  60     |
  */
 export const FOOD_EFFECTS: Record<Food, { hp: number }> = {
   "Baked Potato":   { hp: 20 },
   "Cooked Fish":    { hp: 10 },
   "Cabbage Roll":   { hp: 25 },
   "Carrot Stew":    { hp: 30 },
-  "Pumpkin Soup":   { hp: 40 },
   "Scrambled Eggs": { hp: 35 },
   "Wheat Bread":    { hp: 50 },
-  "Pumpkin Pie":    { hp: 60 },
 };
 
 /**
@@ -213,21 +190,19 @@ export const FOOD_FARM_LEVEL_REQUIREMENT: Record<Food, number> = {
   "Cooked Fish":    1,
   "Cabbage Roll":   2,
   "Carrot Stew":    2,
-  "Pumpkin Soup":   4,
   "Scrambled Eggs": 4,
   "Wheat Bread":    7,
-  "Pumpkin Pie":    6,
 };
 
 /**
  * ANIMALS — purchased with Gold.
- * Chicken eats Carrot (1x). Cow and Sheep both eat Wheat (1x).
+ * Chicken eats Carrot (1x). Cow eats Wheat, Sheep eats Cabbage (1x).
  *
  * | Animal  | Gold | Eats  | Produces |
  * |---------|------|-------|----------|
  * | Chicken | 10   | Carrot| Egg      |
  * | Cow     | 40   | Wheat | Milk     |
- * | Sheep   | 25   | Wheat | Wool     |
+ * | Sheep   | 25   | Cabbage | Wool   |
  */
 export const ANIMALS: Record<Animal, Craftable> = {
   Chicken: {
@@ -246,7 +221,7 @@ export const ANIMALS: Record<Animal, Craftable> = {
   },
   Sheep: {
     name: "Sheep",
-    description: "Produces wool. Eats Wheat.",
+    description: "Produces wool. Eats Cabbage.",
     price: new Decimal(25),
     ingredients: [],
     farmLevelRequirement: 6,
