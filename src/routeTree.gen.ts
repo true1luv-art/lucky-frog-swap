@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GameRouteImport } from './routes/game'
+import { Route as MapEditorRouteImport } from './routes/map-editor'
+import { Route as TestModalsRouteImport } from './routes/test-modals'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameRoute = GameRouteImport.update({
+  id: '/game',
+  path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapEditorRoute = MapEditorRouteImport.update({
+  id: '/map-editor',
+  path: '/map-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestModalsRoute = TestModalsRouteImport.update({
+  id: '/test-modals',
+  path: '/test-modals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/game': typeof GameRoute
+  '/map-editor': typeof MapEditorRoute
+  '/test-modals': typeof TestModalsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/game': typeof GameRoute
+  '/map-editor': typeof MapEditorRoute
+  '/test-modals': typeof TestModalsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/game': typeof GameRoute
+  '/map-editor': typeof MapEditorRoute
+  '/test-modals': typeof TestModalsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/game' | '/map-editor' | '/test-modals'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/game' | '/map-editor' | '/test-modals'
+  id: '__root__' | '/' | '/game' | '/map-editor' | '/test-modals'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GameRoute: typeof GameRoute
+  MapEditorRoute: typeof MapEditorRoute
+  TestModalsRoute: typeof TestModalsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game': {
+      id: '/game'
+      path: '/game'
+      fullPath: '/game'
+      preLoaderRoute: typeof GameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map-editor': {
+      id: '/map-editor'
+      path: '/map-editor'
+      fullPath: '/map-editor'
+      preLoaderRoute: typeof MapEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-modals': {
+      id: '/test-modals'
+      path: '/test-modals'
+      fullPath: '/test-modals'
+      preLoaderRoute: typeof TestModalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GameRoute: GameRoute,
+  MapEditorRoute: MapEditorRoute,
+  TestModalsRoute: TestModalsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

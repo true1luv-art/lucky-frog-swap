@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -77,11 +78,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Lucky Frog — Farm, Craft & Trade" },
+      {
+        name: "description",
+        content:
+          "Lucky Frog is a pixel browser RPG where you grow crops, craft goods and trade. Build your farm — progress saves in your browser.",
+      },
+      { name: "theme-color", content: "#111318" },
+      { property: "og:title", content: "Lucky Frog — Farm, Craft & Trade" },
+      {
+        property: "og:description",
+        content:
+          "Lucky Frog is a pixel browser RPG where you grow crops, craft goods and trade. Build your farm — progress saves in your browser.",
+      },
+      { property: "og:site_name", content: "Lucky Frog" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -92,6 +102,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -102,12 +119,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-background">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="min-h-screen bg-background font-body text-foreground antialiased">
         {children}
+        <Toaster richColors position="top-right" />
         <Scripts />
       </body>
     </html>
