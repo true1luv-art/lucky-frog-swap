@@ -24,8 +24,8 @@ export const GAME_CONFIG = {
   TILE_SIZE: 16,
 
   /** Player sprite sheet frame dimensions */
-  SPRITE_WIDTH:  96,
-  SPRITE_HEIGHT: 64,
+  SPRITE_WIDTH:  80,
+  SPRITE_HEIGHT: 80,
 
   /**
    * Player movement speed in px/s.
@@ -56,5 +56,5 @@ export const NPC_CONFIG = {
 export const PLAYER_CONFIG = {
   /** Arcade physics body dimensions — tight hitbox centred on the feet */
   BODY_SIZE:   { width: 10, height: 10 },
-  BODY_OFFSET: { x: 43,    y: 27     },
+  BODY_OFFSET: { x: 35,    y: 44     },
 } as const;

@@ -1,6 +1,5 @@
 import type Phaser from 'phaser'
 import {
-  CHARACTER_ANIMS,
   NPC_ANIMS,
   PLAYER_ANIMS,
   PLAYER_SUPPORT_ANIMS,
