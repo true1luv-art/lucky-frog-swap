@@ -1,0 +1,15 @@
+export type FishName =
+  | "Anchovy"
+  | "Sardine"
+  | "Tilapia"
+  | "Herring"
+  | "Trout"
+  | "Sea Bass"
+  | "Mackerel"
+  | "Salmon"
+  | "Red Snapper"
+  | "Barracuda"
+  | "Tuna"
+  | "Swordfish"
+  | "Blue Marlin"
+  | "Oarfish";

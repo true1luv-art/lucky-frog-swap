@@ -1,0 +1,9 @@
+.env
+.idea/
+ideas.js
+node_modules
+services/nft/images/
+.playwright/
+.claude/
+ecosystem.config.js
+.l1-node-state.json
