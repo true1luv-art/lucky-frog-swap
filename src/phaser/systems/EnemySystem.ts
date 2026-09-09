@@ -1,11 +1,14 @@
 import Phaser from "phaser";
 import { GAME_CONFIG, PLAYER_CONFIG } from "@/phaser/config/GameConfig";
 import { Enemy } from "@/phaser/entities/Enemy";
+import { ENEMY_SEPARATION_PX } from "@/features/game/enemies";
 import {
-  ENEMY_LEASH_TILES,
-  ENEMY_ATTACK_EXIT_FACTOR,
-  ENEMY_SEPARATION_PX,
-} from "@/features/game/enemies";
+  canStartAttack,
+  decideEnemyState,
+  nextWanderDelay,
+  pickWanderTarget,
+  shouldAttackConnect,
+} from "@/phaser/ai/EnemyBehavior";
 import { ENEMY_SPAWN_POINTS, type EnemySpawnPoint } from "@/phaser/positions/enemySpawnPoints";
 import {
   animBase,
