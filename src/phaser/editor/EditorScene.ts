@@ -76,6 +76,8 @@ export class EditorScene extends Phaser.Scene {
   private dragKey: string | null = null;
   private dragOffset = { x: 0, y: 0 };
   private animalsWalking = true;
+  /** Grid on → tile snapping. Grid off → free 1px (fractional tile) placement. */
+  private snap = true;
   private mapW = 40;
   private mapH = 40;
   private unbind: Array<() => void> = [];
