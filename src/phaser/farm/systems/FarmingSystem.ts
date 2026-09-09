@@ -4,6 +4,7 @@ import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { Player } from "@/phaser/entities/Player";
 import type { PlotNode } from "@/phaser/farm/types";
 import { dispatchUiEvent } from "@/phaser/farm/helpers";
+import { animBase, facingFromVector, playDirectional } from "@/phaser/systems/DirectionalAnimation";
 import { getPlotFarmLevelRequirement } from "@/features/game/farm-level";
 import { isSeed } from "@/features/events/plant/plant";
 import { screenTracker } from "@/features/utils/screen";
@@ -168,20 +169,19 @@ export class FarmingSystem {
       if (!isWatered || wateredAt <= 0 || !cropName) return false;
       return Date.now() >= wateredAt + this.getHarvestMs(cropName);
     })();
-    const actionAnim = currentReady && this.scene.anims.exists("player_shovel")
-      ? "player_shovel"
-      : "player_doing";
-    sprite.stop().play(actionAnim, true);
+    const actionAnim = currentReady ? "player_shovel" : "player_doing";
+    sprite.stop();
+    playDirectional(sprite, actionAnim, facing, true);
 
     let handled = false;
     let safetyTimer: Phaser.Time.TimerEvent | null = null;
     const finish = (animation?: Phaser.Animations.Animation) => {
-      if (animation?.key && animation.key !== actionAnim) return;
+      if (animation?.key && animBase(animation.key) !== actionAnim) return;
       if (handled) return;
       handled = true;
       sprite.off("animationcomplete", finish);
       safetyTimer?.remove(false);
-      sprite.play("player_idle", true);
+      playDirectional(sprite, "player_idle", facing);
 
       const latestFields = (window.__gameStore?.getState?.()?.state as Record<string, Record<string, unknown>>)?.fields ?? {};
       const field      = latestFields[plot.fieldIndex] as Record<string, unknown> | undefined;
