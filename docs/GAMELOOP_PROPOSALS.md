@@ -1,18 +1,19 @@
 # Lucky Frog — Game Loop Proposals
 
-_Updated 2026-09-09. Reworked around four seeds, crop-fed animals, and a new enemy/combat system with Archero-style bow mechanics._
+_Updated 2026-09-09. Reworked around four seeds, crop-fed animals, a new enemy/combat system with Archero-style bow mechanics, and weapon upgrades that make gold matter._
 
 ---
 
-## 1. Design pillars (the new rules)
+## 1. Design pillars
 
-1. **Four seeds only** — Potato, Carrot, Cabbage, Wheat. (Pumpkin is cut for now.)
+1. **Four seeds only** — Potato, Carrot, Cabbage, Wheat.
 2. **Crops feed animals** — Carrot feeds the Chicken, Cabbage feeds the Sheep, Wheat feeds the Cow. Potato is the pure cash/food crop.
 3. **Food restores HP** — cooking matters because combat drains HP.
 4. **Enemies exist** — a new entity (using the player sprites for now) spawns, wanders, spots the player, chases, and attacks.
 5. **Combat is Archero-style** — the player attacks with a bow that fires arrows in a straight line with a fixed range. No auto-hit: arrows travel and can miss, so positioning and movement are the skill.
+6. **Gold funds combat upgrades** — better bows, better tools, and plot expansion give gold a clear purpose.
 
-The economy stays: seeds cost Wood + Stone; selling crops, cooked food, fish and animal produce pays Gold.
+The economy stays: seeds cost Wood + Stone; selling crops, cooked food, fish and animal produce pays Gold. **Wood and Stone are not sellable** (or sell for almost nothing) so farming is mandatory, not optional.
 
 ---
 
@@ -25,7 +26,7 @@ The economy stays: seeds cost Wood + Stone; selling crops, cooked food, fish and
 | Cabbage Seed | 4 Wood + 4 Stone | 10 min | Sheep feed → Wool |
 | Wheat Seed | 8 Wood + 10 Stone | 12 hr | Cow feed → Milk |
 
-Every farmed crop now has a job: Potato → gold/food, the other three → animal produce → higher gold. Wheat's 12-hour timer is now justified because Milk is the top-tier produce.
+Every farmed crop now has a job: Potato → gold/food, the other three → animal produce → higher gold. Wheat's 12-hour timer is justified because Milk is the top-tier produce.
 
 ---
 
@@ -53,9 +54,9 @@ SPAWN → WANDER (random walk in a home radius)
 
 ---
 
-## 4. Combat — Archero-style bow
+## 4. Combat — Archero-style bow + weapon upgrades
 
-**Mechanics:**
+### 4.1 Bow mechanics
 
 - Attack fires an **arrow projectile** in the player's facing direction.
 - Arrow flies in a **straight line only**, up to a **fixed maximum range**, then fizzles.
@@ -69,59 +70,61 @@ SPAWN → WANDER (random walk in a home radius)
 - HP drain finally gives cooked food a purpose: eat to heal between fights.
 - Death handling: at 0 HP, respawn at the farm with a small penalty (drop some gold or resources).
 
-**Later upgrades (gold sink!):** bow tiers — more damage, longer range, faster fire rate, multi-shot.
+### 4.2 Weapon upgrades (gold sink)
+
+Because this loop also funds the fight, the bow becomes the main gold sink:
+
+| Tier | Damage | Range | Fire rate | Extra |
+|---|---|---|---|---|
+| Wood Bow | 1 | 6 tiles | 0.8/s | Starting weapon |
+| Stone Bow | 2 | 7 tiles | 1.0/s | +1 pierce or faster projectile |
+| Iron Bow | 3 | 8 tiles | 1.2/s | Two-arrow spread |
+| Diamond Bow | 5 | 10 tiles | 1.5/s | Three-arrow spread |
+
+Tool upgrades (axe, pickaxe) and plot expansion are secondary sinks. Gold now has a reason to exist beyond buying seeds.
 
 ---
 
-## 5. Three proposals for the full loop
+## 5. The core loop — combined Proposal A + B
 
-### Proposal A — "Farm funds the fight" (smallest change)
+> **"Farm funds the fight, and food fuels it."**
 
-Close the gold loop and bolt combat on as the gold sink.
+This is the union of Proposal A (farm → gold → better gear → push deeper) and Proposal B (combat drains HP → only cooked food heals):
 
-- Seeds cost Wood/Stone as in the table above; **Wood and Stone become unsellable** (or 1 coin) so farming is mandatory, not optional.
-- Enemies guard the deep mine/forest where the best ore and wood are.
-- Gold sinks: bow upgrades, tool upgrades, plot expansion, animals.
+1. Gather **Wood** and **Stone** from the wild and mine. These are **not sellable**, so they can only be spent on seeds and tools.
+2. Buy seeds with Wood/Stone and plant/water/harvest.
+3. Use Carrot, Cabbage, and Wheat to feed your animals for Eggs, Wool, and Milk.
+4. Cook Potatoes and fish into HP-restoring food, and keep some meals in your inventory.
+5. Sell crops, cooked food, fish, and animal produce for **Gold**.
+6. Spend Gold on **bow upgrades**, **tool upgrades**, and **plot expansion**.
+7. With better gear, push deeper into enemy zones for better ore, wood, and rare drops. Combat consumes HP, so bring food.
+8. If you die, respawn at the farm with a small gold/resource penalty, farm back up, and try again.
 
-**Loop:** gather → seeds → farm → feed animals → sell produce → gold → better bow/tools → push deeper for better resources.
+**Loop in one line:**
 
-**Pros:** ships fast, every system already half-exists. **Cons:** combat is a gate, not yet a pillar.
+```text
+gather → seeds → farm → feed/cook → sell → upgrade → fight deeper → repeat
+```
 
-### Proposal B — "Cook, Eat, Fight" (survival loop)
+**Pros:**
 
-Food becomes the fuel of combat.
+- Every system has a job: crops feed animals *and* the player, animals produce gold, gold buys combat upgrades, combat opens better resources.
+- Combat is a real pillar, not just a gate.
+- Wheat's 12-hour timer now matters for both top-tier milk and the best HP meals.
+- Gold finally has a clear purpose: stronger bows and tools.
 
-- Enemy hits drain HP; **only cooked food heals** (Baked Potato +20, etc.).
-- Farming is now doubly required: crops feed animals *and* the player.
-- Enemy zones have tiers; deeper zones hit harder, so you need better food (higher-tier crops) to survive — wheat's 12 hr wait produces the ingredients for the best meals.
-- Death = respawn at farm, small gold penalty.
+**Cons:**
 
-**Loop:** farm → cook → eat → fight → loot → sell → upgrade → fight deeper.
-
-**Pros:** gives all four crops and the kitchen a real job; combat and economy reinforce each other. **Cons:** needs careful tuning so players never soft-lock with 0 HP and no food (keep a free basic food or slow HP regen at the farm).
-
-### Proposal C — "Contracts & hunts" (long-horizon retention)
-
-Layer daily demand on top.
-
-- NPC daily contracts: Rancher wants 5 Milk, Trader wants 10 Wheat Bread, Blacksmith wants 10 ore + 3 enemy drops.
-- Flat market prices drop ~40%; contracts are the real money.
-- Daily bounty board: "clear 5 enemies from the mine" → gold + rare seed.
-- Reputation with NPCs unlocks better contracts and bow/tool tiers.
-
-**Loop:** read board → plan planting → farm/cook → hunt bounties → fulfil contracts → reputation → better everything.
-
-**Pros:** daily login meaning, uses the existing NPC/quest scaffolding. **Cons:** most work — needs persistence for real daily rotation.
+- Needs careful tuning so players never soft-lock with 0 HP and no food. Provide a free basic HP recovery at the farm (slow regen or one free Baked Potato) and make early enemies avoidable.
 
 ---
 
-## 6. Recommendation
-
-Build in this order:
+## 6. Recommended build order
 
 1. **Enemy entity + AI** (wander/chase/attack with player sprites) and the **arrow projectile** — the core new mechanic.
-2. **Proposal A** — make Wood/Stone unsellable, wire gold into bow/tool upgrades.
-3. **Proposal B** — HP drain and food healing.
-4. **Proposal C** — contracts once progress is saved server-side.
+2. **Economy pass** — make Wood/Stone unsellable, set seed costs, and sync market prices.
+3. **Proposal A wiring** — sell items for Gold; add bow/tool upgrade tiers as gold sinks.
+4. **Proposal B wiring** — HP drain on enemy contact; food heals HP; death respawn penalty.
+5. **Proposal C** — daily contracts and bounties once progress is saved server-side.
 
 The single highest-value change regardless of path: **stop letting players sell Wood and Stone for more than a crop is worth** — that one tuning line makes the farm mandatory, and the bow makes gold matter.
