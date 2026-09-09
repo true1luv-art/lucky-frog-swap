@@ -9,7 +9,7 @@
 
 import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { EnemyConfig } from "@/features/game/enemies";
-import { ENEMY_ATTACK_EXIT_FACTOR, ENEMY_LEASH_TILES } from "@/features/game/enemies";
+import { ENEMY_ATTACK_EXIT_FACTOR, ENEMY_DEAGGRO_FACTOR } from "@/features/game/enemies";
 
 const TS = GAME_CONFIG.TILE_SIZE;
 
