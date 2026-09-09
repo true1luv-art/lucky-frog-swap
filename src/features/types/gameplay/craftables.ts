@@ -73,6 +73,13 @@ export const TOOLS: () => Record<ToolName, ToolDetails> = () => ({
     isWoodTool: true,
     maxOwned: 1,
   },
+  Bow: {
+    name: "Bow",
+    description: "Your weapon. Equip it, aim with the mouse and left click to loose arrows. Upgrade the tier at the Blacksmith.",
+    price: 0,
+    isWoodTool: true,
+    maxOwned: 1,
+  },
 });
 
 export type CraftableName = SeedName | Food | Animal;
