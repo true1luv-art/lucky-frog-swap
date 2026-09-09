@@ -13,7 +13,7 @@ export type PlantAction = {
 };
 
 const VALID_SEEDS: InventoryItemName[] = [
-  "Potato Seed", "Carrot Seed", "Cabbage Seed", "Pumpkin Seed", "Wheat Seed",
+  "Potato Seed", "Carrot Seed", "Cabbage Seed", "Wheat Seed",
 ];
 
 export function isSeed(crop: InventoryItemName): crop is SeedName {

@@ -11,7 +11,6 @@ import type { InventoryItemName } from "@/features/types/gameplay/game";
 
 const CROP_HARVEST_MS: Record<string, number> = {
   potato: 60_000,
-  pumpkin: 5 * 60_000,
   carrot: 10 * 60_000,
   cabbage: 30 * 60_000,
   beetroot: 60 * 60_000,

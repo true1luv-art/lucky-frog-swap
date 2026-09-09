@@ -84,7 +84,6 @@ const ACTIVITIES = [
 const CROPS = [
   ["Sunflower", "1 min", "5"],
   ["Potato", "5 min", "14"],
-  ["Pumpkin", "30 min", "30"],
   ["Carrot", "1 hr", "48"],
   ["Cabbage", "2 hr", "70"],
   ["Beetroot", "4 hr", "100"],

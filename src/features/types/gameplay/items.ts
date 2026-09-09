@@ -45,14 +45,12 @@ export const ITEM_TYPE: Record<string, ItemType> = {
   Potato:           "crop",
   Carrot:           "crop",
   Cabbage:          "crop",
-  Pumpkin:          "crop",
   Wheat:            "crop",
 
   // Seeds
   "Potato Seed":    "seed",
   "Carrot Seed":    "seed",
   "Cabbage Seed":   "seed",
-  "Pumpkin Seed":   "seed",
   "Wheat Seed":     "seed",
 
   // Food
@@ -60,10 +58,8 @@ export const ITEM_TYPE: Record<string, ItemType> = {
   "Cooked Fish":    "food",
   "Cabbage Roll":   "food",
   "Carrot Stew":    "food",
-  "Pumpkin Soup":   "food",
   "Scrambled Eggs": "food",
   "Wheat Bread":    "food",
-  "Pumpkin Pie":    "food",
 
   // Fish
   Fish:             "fish",
