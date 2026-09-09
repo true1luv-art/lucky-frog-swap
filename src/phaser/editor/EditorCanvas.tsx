@@ -165,7 +165,8 @@ export default function EditorCanvas() {
                 {field}
                 <input
                   type="number"
-                  value={value}
+                  step="any"
+                  value={Number(value.toFixed(4))}
                   onChange={(e) => {
                     const next = Number(e.target.value);
                     if (Number.isNaN(next)) return;

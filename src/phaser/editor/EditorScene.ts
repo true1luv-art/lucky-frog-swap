@@ -76,6 +76,8 @@ export class EditorScene extends Phaser.Scene {
   private dragKey: string | null = null;
   private dragOffset = { x: 0, y: 0 };
   private animalsWalking = true;
+  /** Grid on → tile snapping. Grid off → free 1px (fractional tile) placement. */
+  private snap = true;
   private mapW = 40;
   private mapH = 40;
   private unbind: Array<() => void> = [];
@@ -291,8 +293,10 @@ export class EditorScene extends Phaser.Scene {
       if (!this.dragKey || !pointer.leftButtonDown()) return;
       const entry = this.markers.find((m) => m.key === this.dragKey);
       if (!entry) return;
-      const nextX = Math.round((pointer.worldX - this.dragOffset.x) / TILE);
-      const nextY = Math.round((pointer.worldY - this.dragOffset.y) / TILE);
+      const rawX = (pointer.worldX - this.dragOffset.x) / TILE;
+      const rawY = (pointer.worldY - this.dragOffset.y) / TILE;
+      const nextX = this.snap ? Math.round(rawX) : Math.round(rawX * TILE) / TILE;
+      const nextY = this.snap ? Math.round(rawY) : Math.round(rawY * TILE) / TILE;
       entry.x = Phaser.Math.Clamp(nextX, 0, this.mapW - entry.w);
       entry.y = Phaser.Math.Clamp(nextY, 0, this.mapH - entry.h);
       this.syncMarker(entry);
@@ -316,8 +320,9 @@ export class EditorScene extends Phaser.Scene {
     const nudge = (dx: number, dy: number) => {
       const entry = this.markers.find((m) => m.key === this.selectedKey);
       if (!entry) return;
-      entry.x = Phaser.Math.Clamp(entry.x + dx, 0, this.mapW - entry.w);
-      entry.y = Phaser.Math.Clamp(entry.y + dy, 0, this.mapH - entry.h);
+      const step = this.snap ? 1 : 1 / TILE;
+      entry.x = Phaser.Math.Clamp(entry.x + dx * step, 0, this.mapW - entry.w);
+      entry.y = Phaser.Math.Clamp(entry.y + dy * step, 0, this.mapH - entry.h);
       this.syncMarker(entry);
       editorBus.emit("select", { marker: this.plain(entry) });
       this.emitMarkers();
@@ -379,7 +384,11 @@ export class EditorScene extends Phaser.Scene {
       editorBus.on("cmd:zoom", ({ zoom }) =>
         this.cameras.main.setZoom(Phaser.Math.Clamp(zoom, 1, 10)),
       ),
-      editorBus.on("cmd:grid", ({ show }) => this.grid?.setVisible(show)),
+      editorBus.on("cmd:grid", ({ show }) => {
+        this.grid?.setVisible(show);
+        // Grid off unlocks free placement so assets can be aligned between tiles.
+        this.snap = show;
+      }),
       editorBus.on("cmd:reset", () => {
         this.markers.forEach((m) => {
           m.sprite.destroy();
