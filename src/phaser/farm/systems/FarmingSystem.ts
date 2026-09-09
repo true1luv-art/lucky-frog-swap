@@ -154,12 +154,27 @@ export class FarmingSystem {
     const facingLeft = sprite.x > plot.x + GAME_CONFIG.TILE_SIZE / 2;
     sprite.setFlipX(facingLeft);
     (player as unknown as Record<string, unknown>).facing = facingLeft ? "left" : "right";
-    sprite.stop().play("player_doing", true);
+
+    // Pick the tool animation up-front: shovel when the crop is ready to be
+    // harvested, hoe for planting / watering work.
+    const currentField = fields[plot.fieldIndex] as Record<string, unknown> | undefined;
+    const currentReady = (() => {
+      if (!currentField) return false;
+      const isWatered = Boolean(currentField.isWatered ?? false);
+      const wateredAt = Number(currentField.wateredAt ?? 0);
+      const cropName  = String(currentField.name ?? "").toLowerCase();
+      if (!isWatered || wateredAt <= 0 || !cropName) return false;
+      return Date.now() >= wateredAt + this.getHarvestMs(cropName);
+    })();
+    const actionAnim = currentReady && this.scene.anims.exists("player_shovel")
+      ? "player_shovel"
+      : "player_doing";
+    sprite.stop().play(actionAnim, true);
 
     let handled = false;
     let safetyTimer: Phaser.Time.TimerEvent | null = null;
     const finish = (animation?: Phaser.Animations.Animation) => {
-      if (animation?.key && animation.key !== "player_doing") return;
+      if (animation?.key && animation.key !== actionAnim) return;
       if (handled) return;
       handled = true;
       sprite.off("animationcomplete", finish);
