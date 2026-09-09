@@ -164,7 +164,7 @@ export class EditorScene extends Phaser.Scene {
       w: number,
       h: number,
       texture?: string,
-      facing?: "left" | "right",
+      facing?: Facing,
     ) => {
       const px = x * TILE;
       const py = y * TILE;
