@@ -160,6 +160,20 @@ export class WorldSystem {
     return tile !== null && tile.index > 0;
   }
 
+  /**
+   * Walkability test for AI pathfinding: true when the tile is outside the
+   * map or covered by a collision boundary tile.
+   */
+  isTileBlocked(tileX: number, tileY: number): boolean {
+    for (const layer of [this.boundaryLayer, this.barnBoundaryLayer]) {
+      if (!layer) continue;
+      if (tileX < 0 || tileY < 0 || tileX >= layer.layer.width || tileY >= layer.layer.height) return true;
+      const tile = layer.getTileAt(tileX, tileY);
+      if (tile && tile.index > 0) return true;
+    }
+    return false;
+  }
+
   private boundaryLayer:     Phaser.Tilemaps.TilemapLayer | null = null;
   private barnBoundaryLayer: Phaser.Tilemaps.TilemapLayer | null = null;
 
