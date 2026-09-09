@@ -19,8 +19,8 @@ export const NpcAssetLoader = {
       frameHeight: 64,
     })
     scene.load.spritesheet('npc_blacksmith', `${NPC_SPRITES}/blacksmith_strip23.png`, {
-      frameWidth: 84,
-      frameHeight: 56,
+      frameWidth: 96,
+      frameHeight: 64,
     })
   },
 }
