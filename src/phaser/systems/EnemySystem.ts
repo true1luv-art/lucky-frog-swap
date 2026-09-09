@@ -9,6 +9,13 @@ import {
   pickWanderTarget,
   shouldAttackConnect,
 } from "@/phaser/ai/EnemyBehavior";
+import {
+  findPath,
+  hasLineOfSight,
+  nextWaypoint,
+  toTile,
+  type TilePoint,
+} from "@/phaser/ai/Pathfinding";
 import { ENEMY_SPAWN_POINTS, type EnemySpawnPoint } from "@/phaser/positions/enemySpawnPoints";
 import {
   animBase,
