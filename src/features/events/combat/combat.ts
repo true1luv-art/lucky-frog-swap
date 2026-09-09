@@ -13,6 +13,7 @@ export type EnemyDefeatedAction = {
   enemyType: EnemyType;
 };
 export type BowUpgradeAction = { type: "bow.upgrade"; tier: BowTier };
+export type BowEquipAction = { type: "bow.equip"; equipped: boolean };
 
 function maxHpOf(state: GameState): number {
   return getMaxHp(getSkillLevel(state.skills?.cooking ?? 0));
@@ -67,4 +68,12 @@ export function bowUpgrade({
   const coins = state.coins ?? new Decimal(0);
   if (coins.lessThan(cost)) throw new Error("Not enough gold");
   return { ...state, coins: coins.sub(cost), bowTier: action.tier };
+}
+
+/** Equip / unequip the bow. Only an equipped bow can be aimed and fired. */
+export function bowEquip({
+  state,
+  action,
+}: { state: GameState; action: BowEquipAction }): GameState {
+  return { ...state, bowEquipped: action.equipped };
 }

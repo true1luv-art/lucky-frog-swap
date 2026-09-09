@@ -44,11 +44,16 @@ export class ProjectileSystem {
     g.destroy();
   }
 
+  /**
+   * Fire an arrow. When `angleRad` is supplied the arrow flies along that exact
+   * angle (mouse aiming); otherwise it uses the four-way facing direction.
+   */
   fire(
     x: number,
     y: number,
     facing: "up" | "down" | "left" | "right",
     stats: BowStats,
+    angleRad?: number,
   ) {
     const sprite = this.group.get(x, y, ARROW_TEXTURE) as Phaser.Physics.Arcade.Sprite | null;
     if (!sprite) return;
@@ -57,12 +62,15 @@ export class ProjectileSystem {
     sprite.setDepth(y + 2);
     sprite.setOrigin(0.5, 0.5);
 
-    const dir = {
-      up:    { x: 0,  y: -1 },
-      down:  { x: 0,  y: 1  },
-      left:  { x: -1, y: 0  },
-      right: { x: 1,  y: 0  },
-    }[facing];
+    const dir =
+      angleRad === undefined
+        ? {
+            up:    { x: 0,  y: -1 },
+            down:  { x: 0,  y: 1  },
+            left:  { x: -1, y: 0  },
+            right: { x: 1,  y: 0  },
+          }[facing]
+        : { x: Math.cos(angleRad), y: Math.sin(angleRad) };
 
     const body = sprite.body as Phaser.Physics.Arcade.Body | null;
     body?.setAllowGravity(false);
