@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { Player } from "@/phaser/entities/Player";
 import type { FishingNode } from "@/phaser/farm/types";
 import { dispatchUiEvent } from "@/phaser/farm/helpers";
+import { facingFromVector, playDirectional, type Facing } from "@/phaser/systems/DirectionalAnimation";
 
 interface FishingSystemOptions {
   nodes: Record<string, FishingNode>;
@@ -103,14 +104,15 @@ export class FishingSystem {
     window.dispatchEvent(new CustomEvent("phaser-fishing-start", {
       detail: { castDurationMs: (15 + 13 + 10) * 100 },
     }));
+    const facing = (player.facing ?? "down") as Facing;
     const play = (key: string, next: () => void) => {
       if (!hasAnimation(key)) return next();
-      sprite.play(key, true);
+      playDirectional(sprite, key, facing, true);
       sprite.once("animationcomplete", next);
     };
     const caught = () => {
       dispatchUiEvent(spot.event, { spot });
-      if (hasAnimation("player_idle")) sprite.play("player_idle", true);
+      playDirectional(sprite, "player_idle", facing);
       this.casting = false;
     };
     play("player_casting", () => play("player_reeling", () => play("player_caught", caught)));
@@ -145,14 +147,7 @@ export class FishingSystem {
       }
     }
 
-    const dx = bestX - px;
-    const dy = bestY - py;
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      player.facing = dx < 0 ? "left" : "right";
-      player.sprite.setFlipX(dx < 0);
-    } else {
-      player.facing = dy < 0 ? "up" : "down";
-    }
+    player.facing = facingFromVector(bestX - px, bestY - py);
   }
 
   private get spot(): FishingNode | undefined {

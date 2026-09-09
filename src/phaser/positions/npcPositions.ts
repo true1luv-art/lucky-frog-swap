@@ -4,7 +4,7 @@ export interface NpcPositionDef {
   y: number
   width: number
   height: number
-  facing?: 'left' | 'right'
+  facing?: 'up' | 'down' | 'left' | 'right'
   texture?: string
   event?: string
   /** Display name shown as a floating label above the NPC sprite. */
@@ -22,7 +22,7 @@ export const NPC_POSITIONS: NpcPositionDef[] = [
     y: 24,
     width: 2,
     height: 2,
-    facing: 'right',
+    facing: 'down',
     texture: 'npc_rancher',
     event: 'phaser-barn-open',
     name: 'Rancher',
@@ -33,7 +33,7 @@ export const NPC_POSITIONS: NpcPositionDef[] = [
     y: 21,
     width: 2,
     height: 2,
-    facing: 'right',
+    facing: 'down',
     texture: 'npc_trader',
     event: 'phaser-trader-open',
     name: 'Trader',
@@ -44,7 +44,7 @@ export const NPC_POSITIONS: NpcPositionDef[] = [
     y: 3,
     width: 2,
     height: 2,
-    facing: 'right',
+    facing: 'down',
     texture: 'npc_blacksmith',
     event: 'phaser-blacksmith-open',
     name: 'Blacksmith',

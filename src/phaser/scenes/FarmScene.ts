@@ -4,6 +4,12 @@ import * as Loaders from "@/phaser/loaders/index";
 import { AnimationSystem } from "@/phaser/systems/AnimationSystem";
 import { InputSystem } from "@/phaser/systems/InputSystem";
 import { ProximitySystem } from "@/phaser/systems/ProximitySystem";
+import {
+  animBase,
+  facingFromVector,
+  playDirectional,
+  type Facing,
+} from "@/phaser/systems/DirectionalAnimation";
 import { createPlayer } from "@/phaser/entities/Player";
 import type { Player } from "@/phaser/entities/Player";
 import { ProximityHighlight } from "@/phaser/ui/overlays/ProximityHighlight";
@@ -148,28 +154,24 @@ export class FarmScene extends Phaser.Scene {
     this.player.sprite.setDepth(this.player.sprite.y);
 
     const movement = this.input_.getMovement();
-    const canAnim  = (key: string) => this.anims.exists(key);
 
     const currentAnim   = this.player.sprite.anims?.currentAnim?.key;
+    const currentBase   = animBase(currentAnim);
     const actionAnims   = [
       "player_mine", "player_axe", "player_doing", "player_shovel", "player_hammer",
       "player_casting", "player_reeling", "player_caught",
     ];
     const playingAction =
-      actionAnims.includes(currentAnim ?? "") && this.player.sprite.anims?.isPlaying;
+      actionAnims.includes(currentBase) && this.player.sprite.anims?.isPlaying;
 
     if (!playingAction) {
+      const facing = (this.player.facing ?? "down") as Facing;
       if (movement.moving) {
-        (this.player as unknown as Record<string, unknown>).facing = movement.facing;
         this.player.applyMovement(movement);
-        if (canAnim("player_walk") && currentAnim !== "player_walk") {
-          this.player.sprite.play("player_walk", true);
-        }
+        playDirectional(this.player.sprite, "player_walk", movement.facing as Facing);
       } else {
         (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
-        if (canAnim("player_idle") && currentAnim !== "player_idle") {
-          this.player.sprite.play("player_idle", true);
-        }
+        playDirectional(this.player.sprite, "player_idle", facing);
       }
     } else {
       (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
@@ -216,32 +218,31 @@ export class FarmScene extends Phaser.Scene {
     this._lastShotAt = now;
 
     // Fire from the player's body centre (feet), offset forward a little.
-    const facing = this.player.facing;
+    let facing = this.player.facing;
     const bx = this.player.sprite.x
       + PLAYER_CONFIG.BODY_OFFSET.x + PLAYER_CONFIG.BODY_SIZE.width / 2
       - GAME_CONFIG.SPRITE_WIDTH / 2;
     const by = this.player.sprite.y
       + PLAYER_CONFIG.BODY_OFFSET.y + PLAYER_CONFIG.BODY_SIZE.height / 2
       - GAME_CONFIG.SPRITE_HEIGHT / 2;
-    const nudge = 8;
-    const ox = facing === "left" ? -nudge : facing === "right" ? nudge : 0;
-    const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
-
     // Aim along the mouse cursor when we have one; fall back to facing.
     const aim = this.input_.aim;
     const angle = aim
       ? Phaser.Math.Angle.Between(bx, by, aim.x, aim.y)
       : undefined;
 
-    if (angle !== undefined) {
+    if (aim) {
       // Face the shot so the animation reads correctly.
-      const deg = Phaser.Math.RadToDeg(angle);
-      if (deg > -45 && deg <= 45)        this.player.sprite.setFlipX(false);
-      else if (deg > 135 || deg <= -135) this.player.sprite.setFlipX(true);
+      facing = facingFromVector(aim.x - bx, aim.y - by);
+      this.player.facing = facing;
     }
 
+    const nudge = 8;
+    const ox = facing === "left" ? -nudge : facing === "right" ? nudge : 0;
+    const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
+
     this.projectileSystem.fire(bx + ox, by + oy, facing, stats, angle);
-    if (this.anims.exists("player_doing")) this.player.sprite.play("player_doing", true);
+    playDirectional(this.player.sprite, "player_casting", facing as Facing);
   }
 
   /** The bow is a normal inventory tool: it is "equipped" when it is the

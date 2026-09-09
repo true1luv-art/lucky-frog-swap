@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 import { GAME_CONFIG, PLAYER_CONFIG } from "@/phaser/config/GameConfig";
 import { ENEMY_CONFIG, type EnemyConfig, type EnemyType } from "@/features/game/enemies";
+import { DEFAULT_FACING, playDirectional, type Facing } from "@/phaser/systems/DirectionalAnimation";
 
 export type EnemyState = "idle" | "wander" | "chase" | "attack" | "return";
 
@@ -27,6 +28,8 @@ export class Enemy {
   /** Epoch ms when the telegraphed swing lands; 0 when not winding up. */
   windupUntil = 0;
   dying = false;
+  /** Direction row used for the sprite animations. */
+  facing: Facing = DEFAULT_FACING;
 
 
   constructor(scene: Phaser.Scene, id: string, type: EnemyType, x: number, y: number) {
@@ -49,8 +52,8 @@ export class Enemy {
       .setOffset(PLAYER_CONFIG.BODY_OFFSET.x, PLAYER_CONFIG.BODY_OFFSET.y);
     body?.setCollideWorldBounds(true);
 
-    if (textureKey === "player_idle" && scene.anims.exists("player_idle")) {
-      this.sprite.play("player_idle");
+    if (textureKey === "player_idle") {
+      playDirectional(this.sprite, "player_idle", this.facing);
     } else if (textureKey === "__DEFAULT") {
       this.sprite.setDisplaySize(14, 20);
     }

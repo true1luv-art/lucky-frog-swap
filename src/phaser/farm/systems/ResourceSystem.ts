@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { Player } from "@/phaser/entities/Player";
 import type { ResourceNode } from "@/phaser/farm/types";
 import { dispatchUiEvent } from "@/phaser/farm/helpers";
+import { facingFromVector, playDirectional } from "@/phaser/systems/DirectionalAnimation";
 import {
   STONE_RECOVERY_SECONDS,
   TREE_RECOVERY_SECONDS,
@@ -89,9 +90,13 @@ export class ResourceSystem {
     const player    = this.options.player();
     const sprite    = player?.sprite;
     const nodeCenterX = node.x + GAME_CONFIG.TILE_SIZE;
+    const nodeCenterY = node.y + GAME_CONFIG.TILE_SIZE;
     const facingLeft  = (sprite?.x ?? nodeCenterX) > nodeCenterX;
-    sprite?.setFlipX(facingLeft);
-    if (player) (player as unknown as Record<string, unknown>).facing = facingLeft ? "left" : "right";
+    const facing = facingFromVector(
+      nodeCenterX - (sprite?.x ?? nodeCenterX),
+      nodeCenterY - (sprite?.y ?? nodeCenterY),
+    );
+    if (player) (player as unknown as Record<string, unknown>).facing = facing;
 
     const applyVisual = () => {
       if (depleting) {
@@ -123,12 +128,12 @@ export class ResourceSystem {
       );
     };
 
+    // Axe for trees, pickaxe for stone / ore.
     const actionKey = isTree ? "player_axe" : "player_mine";
-    if (sprite && this.scene.anims.exists(actionKey)) {
-      sprite.play(actionKey, true);
+    if (sprite && playDirectional(sprite, actionKey, facing, true)) {
       sprite.once("animationcomplete", () => {
         applyVisual();
-        if (this.scene.anims.exists("player_idle")) sprite.play("player_idle", true);
+        playDirectional(sprite, "player_idle", facing);
         this.strikeLocked = false;
       });
       return;
