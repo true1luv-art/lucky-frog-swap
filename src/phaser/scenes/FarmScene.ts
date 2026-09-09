@@ -217,14 +217,12 @@ export class FarmScene extends Phaser.Scene {
     if (now - this._lastShotAt < stats.fireRateMs) return;
     this._lastShotAt = now;
 
-    // Fire from the player's body centre (feet), offset forward a little.
+    // Fire from the character's centre (where the bow is drawn), pushed a
+    // little forward along the actual aim direction so the arrow leaves the
+    // bow instead of the feet or a corner.
     let facing = this.player.facing;
-    const bx = this.player.sprite.x
-      + PLAYER_CONFIG.BODY_OFFSET.x + PLAYER_CONFIG.BODY_SIZE.width / 2
-      - GAME_CONFIG.SPRITE_WIDTH / 2;
-    const by = this.player.sprite.y
-      + PLAYER_CONFIG.BODY_OFFSET.y + PLAYER_CONFIG.BODY_SIZE.height / 2
-      - GAME_CONFIG.SPRITE_HEIGHT / 2;
+    const bx = this.player.sprite.x;
+    const by = this.player.sprite.y;
     // Aim along the mouse cursor when we have one; fall back to facing.
     const aim = this.input_.aim;
     const angle = aim
@@ -237,11 +235,18 @@ export class FarmScene extends Phaser.Scene {
       this.player.facing = facing;
     }
 
-    const nudge = 8;
-    const ox = facing === "left" ? -nudge : facing === "right" ? nudge : 0;
-    const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
+    const nudge = 10;
+    const dir =
+      angle !== undefined
+        ? { x: Math.cos(angle), y: Math.sin(angle) }
+        : {
+            up:    { x: 0,  y: -1 },
+            down:  { x: 0,  y: 1  },
+            left:  { x: -1, y: 0  },
+            right: { x: 1,  y: 0  },
+          }[facing];
 
-    this.projectileSystem.fire(bx + ox, by + oy, facing, stats, angle);
+    this.projectileSystem.fire(bx + dir.x * nudge, by + dir.y * nudge, facing, stats, angle);
     playDirectional(this.player.sprite, "player_bow", facing as Facing, false);
   }
 
