@@ -1,0 +1,107 @@
+import Phaser from "phaser";
+import { GAME_CONFIG } from "@/phaser/config/GameConfig";
+import type { BowStats } from "@/features/game/bow";
+
+const ARROW_TEXTURE = "combat_arrow";
+const ARROW_SPEED = 320; // px/s
+
+export interface Arrow {
+  sprite: Phaser.Physics.Arcade.Sprite;
+  startX: number;
+  startY: number;
+  maxDist: number;
+  damage: number;
+}
+
+/**
+ * ProjectileSystem — Archero-style arrows.
+ * Arrows fly in a straight line along the player's facing direction and die
+ * once they exceed the bow's max range or hit something.
+ */
+export class ProjectileSystem {
+  group: Phaser.Physics.Arcade.Group;
+  arrows: Arrow[] = [];
+  private scene: Phaser.Scene;
+
+  constructor(scene: Phaser.Scene) {
+    this.scene = scene;
+    this._ensureTexture();
+    this.group = scene.physics.add.group({ defaultKey: ARROW_TEXTURE, allowGravity: false });
+  }
+
+  /** Draws a tiny pixel arrow once and caches it as a texture. */
+  private _ensureTexture() {
+    if (this.scene.textures.exists(ARROW_TEXTURE)) return;
+    const g = this.scene.add.graphics();
+    g.fillStyle(0x6b4423, 1);
+    g.fillRect(0, 3, 9, 2);      // shaft
+    g.fillStyle(0xd8d8d8, 1);
+    g.fillTriangle(9, 1, 9, 7, 13, 4); // head
+    g.fillStyle(0xf2e6c9, 1);
+    g.fillRect(0, 1, 2, 2);      // fletching
+    g.fillRect(0, 5, 2, 2);
+    g.generateTexture(ARROW_TEXTURE, 13, 8);
+    g.destroy();
+  }
+
+  fire(
+    x: number,
+    y: number,
+    facing: "up" | "down" | "left" | "right",
+    stats: BowStats,
+  ) {
+    const sprite = this.group.get(x, y, ARROW_TEXTURE) as Phaser.Physics.Arcade.Sprite | null;
+    if (!sprite) return;
+
+    sprite.setActive(true).setVisible(true);
+    sprite.setDepth(y + 2);
+    sprite.setOrigin(0.5, 0.5);
+
+    const dir = {
+      up:    { x: 0,  y: -1 },
+      down:  { x: 0,  y: 1  },
+      left:  { x: -1, y: 0  },
+      right: { x: 1,  y: 0  },
+    }[facing];
+
+    const body = sprite.body as Phaser.Physics.Arcade.Body | null;
+    body?.setAllowGravity(false);
+    body?.setSize(10, 6);
+    sprite.setVelocity(dir.x * ARROW_SPEED, dir.y * ARROW_SPEED);
+    sprite.setRotation(Math.atan2(dir.y, dir.x));
+
+    this.arrows.push({
+      sprite,
+      startX: x,
+      startY: y,
+      maxDist: stats.rangeTiles * GAME_CONFIG.TILE_SIZE,
+      damage: stats.damage,
+    });
+  }
+
+  findBySprite(sprite: unknown): Arrow | undefined {
+    return this.arrows.find((a) => a.sprite === sprite);
+  }
+
+  kill(arrow: Arrow) {
+    arrow.sprite.setActive(false).setVisible(false);
+    arrow.sprite.setVelocity(0, 0);
+    this.arrows = this.arrows.filter((a) => a !== arrow);
+  }
+
+  update() {
+    for (const arrow of [...this.arrows]) {
+      const traveled = Phaser.Math.Distance.Between(
+        arrow.startX, arrow.startY, arrow.sprite.x, arrow.sprite.y,
+      );
+      if (!arrow.sprite.active || traveled >= arrow.maxDist) {
+        this.kill(arrow);
+      }
+    }
+  }
+
+  destroy() {
+    this.arrows = [];
+    this.group?.clear(true, true);
+  }
+}

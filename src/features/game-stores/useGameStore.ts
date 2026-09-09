@@ -90,6 +90,7 @@ const INITIAL_FARM: GameState = {
   equipment: createInitialEquipment(),
   coins:   new Decimal(0),
   hp: INITIAL_HP,
+  bowTier: "Wood",
   fishing: {
     lastCastAt:     0,
     lastCaughtFish: null,
@@ -201,6 +202,7 @@ function mergeServerState(local: GameState, server: GameState): GameState {
     // Coins and HP: server is authoritative; fall back to local optimistic values.
     coins:          server.coins          ?? local.coins,
     hp:             server.hp             ?? local.hp,
+    bowTier:        server.bowTier        ?? local.bowTier ?? "Wood",
     // Local cosmetics win
     username:    local.username    ?? server.username,
     avatarUrl:   local.avatarUrl   ?? server.avatarUrl,

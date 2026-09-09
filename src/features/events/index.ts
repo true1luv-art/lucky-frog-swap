@@ -38,6 +38,12 @@ import type { DestroyArmorAction }      from "@/features/events/equipment/destro
 import type { SellResourceAction }      from "@/features/events/sell/sellResource";
 import type { SellFoodAction }          from "@/features/events/sell/sellFood";
 import type { SellProduceAction }       from "@/features/events/sell/sellProduce";
+import type {
+  PlayerHurtAction,
+  PlayerDiedAction,
+  EnemyDefeatedAction,
+  BowUpgradeAction,
+} from "@/features/events/combat/combat";
 
 export type GameAction =
   | PlantAction
@@ -67,7 +73,11 @@ export type GameAction =
   | SellAction
   | SellResourceAction
   | SellFoodAction
-  | SellProduceAction;
+  | SellProduceAction
+  | PlayerHurtAction
+  | PlayerDiedAction
+  | EnemyDefeatedAction
+  | BowUpgradeAction;
 
 export interface GameEvent {
   action: GameAction;
@@ -136,6 +146,12 @@ import { sell }             from "@/features/events/sell/sell";
 import { sellResource }     from "@/features/events/sell/sellResource";
 import { sellFood }         from "@/features/events/sell/sellFood";
 import { sellProduce }      from "@/features/events/sell/sellProduce";
+import {
+  playerHurt,
+  playerDied,
+  enemyDefeated,
+  bowUpgrade,
+} from "@/features/events/combat/combat";
 
 export function processGameEvent(state: GameState, event: GameEvent): GameState {
   const { action, createdAt } = event;
@@ -197,6 +213,14 @@ export function processGameEvent(state: GameState, event: GameEvent): GameState 
         return sellFood({ state, action });
       case "produce.sell":
         return sellProduce({ state, action });
+      case "player.hurt":
+        return playerHurt({ state, action });
+      case "player.died":
+        return playerDied({ state });
+      case "enemy.defeated":
+        return enemyDefeated({ state, action });
+      case "bow.upgrade":
+        return bowUpgrade({ state, action });
       default:
         return state;
     }

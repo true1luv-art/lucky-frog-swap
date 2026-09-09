@@ -18,6 +18,7 @@ import { ShopShowcase, ShowcaseChip } from "@/components/ui/ShopShowcase";
 import { ShopShelf } from "@/components/ui/ShopShelf";
 import { Box } from "@/components/ui/Box";
 import type { ResourceName } from "@/features/types/gameplay/resources";
+import { BOW_TIER, BOW_TIER_ORDER, getNextBowTier, type BowTier } from "@/features/game/bow";
 
 const blacksmithIcon = "/assets/icons/anvil.png";
 const hammerIcon     = "/assets/icons/hammer.png";
@@ -42,6 +43,7 @@ type SmeltItem = "Coal" | OreType;
 const NAV_ITEMS: NavRailItem[] = [
   { id: "smelt", label: "Smelt", icon: hammerIcon     },
   { id: "tools", label: "Tools", icon: hammerIcon     },
+  { id: "bow",   label: "Bow",   icon: hammerIcon     },
 ];
 
 function itemImage(name: string): string {
@@ -65,13 +67,32 @@ interface Props {
   onClose: () => void;
 }
 
-type Tab = "smelt" | "tools";
+type Tab = "smelt" | "tools" | "bow";
 
 export const BlacksmithModal: React.FC<Props> = ({ show, onClose }) => {
   const items     = useGameStore((s) => s.state?.items ?? {});
   const tools     = useGameStore((s) => s.state?.tools ?? []);
+  const coins     = useGameStore((s) => s.state?.coins);
+  const bowTier   = useGameStore((s) => s.state?.bowTier ?? "Wood");
   const send      = useGameStore((s) => s.send);
   const { addToast } = useFarmToast();
+
+  // ── Bow upgrades ───────────────────────────────────────────────────────
+  const goldBalance   = coins ? new Decimal(coins).toNumber() : 0;
+  const currentBow    = BOW_TIER[bowTier as BowTier] ?? BOW_TIER.Wood;
+  const nextBowTier   = getNextBowTier(bowTier as BowTier);
+  const nextBow       = nextBowTier ? BOW_TIER[nextBowTier] : null;
+  const canUpgradeBow = !!nextBow && goldBalance >= nextBow.goldCost;
+
+  const upgradeBow = () => {
+    if (!nextBowTier || !canUpgradeBow) return;
+    try {
+      send({ type: "bow.upgrade", tier: nextBowTier });
+      addToast(`Forged the ${nextBowTier} Bow`);
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : "Cannot upgrade bow");
+    }
+  };
 
   const [tab,          setTab]          = useState<Tab>("smelt");
   const [smeltItem,    setSmeltItem]    = useState<SmeltItem>("Iron");
@@ -179,6 +200,18 @@ export const BlacksmithModal: React.FC<Props> = ({ show, onClose }) => {
       >
         <Button className="text-xs px-4 w-auto" disabled={!canCraftTool} onClick={craftTool}>
           {toolTier === "Wood" ? "Craft Free" : "Craft"}
+        </Button>
+      </ActionDock>
+    ) : tab === "bow" ? (
+      <ActionDock
+        info={
+          <span className="truncate text-[10px] text-shadow text-gray-400">
+            {goldBalance} Gold · {bowTier} Bow equipped
+          </span>
+        }
+      >
+        <Button className="text-xs px-4 w-auto" disabled={!canUpgradeBow} onClick={upgradeBow}>
+          {nextBow ? `Upgrade — ${nextBow.goldCost}g` : "Max tier"}
         </Button>
       </ActionDock>
     ) : null;
@@ -333,6 +366,40 @@ export const BlacksmithModal: React.FC<Props> = ({ show, onClose }) => {
         </>
       )}
 
+      {/* ══ BOW ═══════════════════════════════════════════════════════════ */}
+      {tab === "bow" && (
+        <>
+          <ShopShowcase
+            name={`${bowTier} Bow`}
+            image="/assets/icons/hammer.png"
+            description={
+              nextBow && nextBowTier
+                ? `Next: ${nextBowTier} Bow — ${nextBow.damage} damage, ${nextBow.rangeTiles} tile range, ${(1000 / nextBow.fireRateMs).toFixed(1)} shots/sec.`
+                : "Your bow is fully forged — the strongest tier available."
+            }
+            chips={
+              <>
+                <ShowcaseChip>{currentBow.damage} damage</ShowcaseChip>
+                <ShowcaseChip>{currentBow.rangeTiles} tile range</ShowcaseChip>
+                <ShowcaseChip danger={!!nextBow && !canUpgradeBow}>
+                  {nextBow ? `${goldBalance} / ${nextBow.goldCost} Gold` : `${goldBalance} Gold`}
+                </ShowcaseChip>
+              </>
+            }
+          />
+
+          <ShopShelf>
+            {BOW_TIER_ORDER.map((t) => (
+              <Box
+                key={t}
+                image="/assets/icons/hammer.png"
+                isSelected={t === bowTier}
+                onClick={() => undefined}
+              />
+            ))}
+          </ShopShelf>
+        </>
+      )}
 
     </ModalShell>
   );

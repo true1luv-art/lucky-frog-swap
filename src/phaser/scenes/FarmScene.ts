@@ -29,6 +29,10 @@ import { ResourceSystem } from "@/phaser/farm/systems/ResourceSystem";
 import { WorldInteractionSystem } from "@/phaser/farm/systems/WorldInteractionSystem";
 import { WorldSystem } from "@/phaser/farm/systems/WorldSystem";
 import { dispatchUiEvent, getNodeAtTile, getSkillLevel } from "@/phaser/farm/helpers";
+import { EnemySystem } from "@/phaser/systems/EnemySystem";
+import { ProjectileSystem } from "@/phaser/systems/ProjectileSystem";
+import type { Enemy } from "@/phaser/entities/Enemy";
+import { getBowStats, type BowTier } from "@/features/game/bow";
 
 /**
  * FarmScene — farming-only Phaser scene.
@@ -69,6 +73,12 @@ export class FarmScene extends Phaser.Scene {
   private farmingSystem?: FarmingSystem;
   private fishingSystem?: FishingSystem;
   private resourceSystem?: ResourceSystem;
+  private enemySystem?: EnemySystem;
+  private projectileSystem?: ProjectileSystem;
+  private _lastShotAt = 0;
+  private _invulnUntilMs = 0;
+  private _respawning = false;
+  private _spawnPoint = { x: 400, y: 400 };
 
   private _lastPointerDownMs = 0;
 
@@ -180,8 +190,149 @@ export class FarmScene extends Phaser.Scene {
 
     this.worldInteractionSystem?.update();
     this.fishingSystem?.update();
+    this._updateCombat();
     this._checkTravelBoundaries();
     this._writeMobileActionHint();
+  }
+
+  // ─── Combat ────────────────────────────────────────────────────────────────
+
+  private _updateCombat() {
+    if (!this.enemySystem || !this.projectileSystem) return;
+
+    this.enemySystem.update(this.player.sprite);
+    this.projectileSystem.update();
+    this._resolveArrowHits();
+
+
+    const wantsAttack = this.input_.consumeAttack();
+    if (!wantsAttack || this._respawning) return;
+
+    const stats = getBowStats(this._readBowTier());
+    const now = this.time.now;
+    if (now - this._lastShotAt < stats.fireRateMs) return;
+    this._lastShotAt = now;
+
+    // Fire from the player's body centre (feet), offset forward a little.
+    const facing = this.player.facing;
+    const bx = this.player.sprite.x
+      + PLAYER_CONFIG.BODY_OFFSET.x + PLAYER_CONFIG.BODY_SIZE.width / 2
+      - GAME_CONFIG.SPRITE_WIDTH / 2;
+    const by = this.player.sprite.y
+      + PLAYER_CONFIG.BODY_OFFSET.y + PLAYER_CONFIG.BODY_SIZE.height / 2
+      - GAME_CONFIG.SPRITE_HEIGHT / 2;
+    const nudge = 8;
+    const ox = facing === "left" ? -nudge : facing === "right" ? nudge : 0;
+    const oy = facing === "up" ? -nudge : facing === "down" ? nudge : 0;
+
+    this.projectileSystem.fire(bx + ox, by + oy, facing, stats);
+    if (this.anims.exists("player_doing")) this.player.sprite.play("player_doing", true);
+  }
+
+  /**
+   * Arrow → enemy hit detection.
+   *
+   * Enemy physics bodies are tiny feet boxes (they mirror the player's), which
+   * makes arcade overlap far too easy to slip past. A distance check against the
+   * enemy body centre with a generous radius feels much closer to Archero.
+   */
+  private _resolveArrowHits() {
+    if (!this.enemySystem || !this.projectileSystem) return;
+    const HIT_RADIUS = 18;
+
+    for (const arrow of [...this.projectileSystem.arrows]) {
+      if (!arrow.sprite.active) continue;
+      for (const enemy of this.enemySystem.getEnemies()) {
+        if (enemy.dying || enemy.isDead()) continue;
+        const dist = Phaser.Math.Distance.Between(
+          arrow.sprite.x, arrow.sprite.y, enemy.bodyX, enemy.bodyY,
+        );
+        if (dist > HIT_RADIUS) continue;
+
+        enemy.takeDamage(arrow.damage);
+        this.projectileSystem.kill(arrow);
+        this._floatText(enemy.bodyX, enemy.bodyY - 26, `-${arrow.damage}`, "#ff6b6b");
+
+        enemy.sprite.setTintFill(0xffffff);
+        this.time.delayedCall(70, () => {
+          if (enemy.sprite?.active) enemy.sprite.setTint(enemy.config.spriteTint);
+        });
+
+        if (enemy.isDead()) this.enemySystem.handleDeath(enemy);
+        break;
+      }
+    }
+  }
+
+  private _readBowTier(): BowTier {
+    const gs = window.__gameStore?.getState?.()?.state as Record<string, unknown> | undefined;
+    return (gs?.bowTier as BowTier) ?? "Wood";
+  }
+
+  private _hurtPlayer(damage: number) {
+    if (this._respawning) return;
+    const now = this.time.now;
+    if (now < this._invulnUntilMs) return;
+    this._invulnUntilMs = now + 400;
+
+    const store = window.__gameStore?.getState?.();
+    store?.dispatch?.({ type: "player.hurt", damage });
+
+    this._floatText(this.player.sprite.x, this.player.sprite.y - 20, `-${damage}`, "#ff9494");
+    this.player.sprite.setTintFill(0xff4444);
+    this.time.delayedCall(90, () => this.player.sprite?.clearTint());
+    this.cameras.main.shake(90, 0.004);
+
+    const hp = Number((store?.state as Record<string, unknown> | undefined)?.hp ?? 100);
+    if (hp - damage <= 0) this._respawnPlayer();
+  }
+
+  private _rewardKill(enemy: Enemy) {
+    window.__gameStore?.getState?.()?.dispatch?.({
+      type: "enemy.defeated",
+      enemyId: enemy.id,
+      enemyType: enemy.type,
+    });
+    this._floatText(enemy.bodyX, enemy.bodyY - 34, `+${enemy.config.goldDrop}g`, "#ffd75e");
+  }
+
+  private _respawnPlayer() {
+    if (this._respawning) return;
+    this._respawning = true;
+
+    const cam = this.cameras.main;
+    cam.fade(220, 0, 0, 0);
+    this.time.delayedCall(260, () => {
+      this.player.sprite.setPosition(this._spawnPoint.x, this._spawnPoint.y);
+      (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
+      this.enemySystem?.resetAll();
+      window.__gameStore?.getState?.()?.dispatch?.({ type: "player.died" });
+      dispatchUiEvent("phaser-player-died", {});
+      cam.fadeIn(220, 0, 0, 0);
+      this._invulnUntilMs = this.time.now + 2000;
+      this._respawning = false;
+    });
+  }
+
+  /** Small floating combat number rendered in-world. */
+  private _floatText(x: number, y: number, text: string, color: string) {
+    const label = this.add.text(x, y, text, {
+      fontFamily: "monospace",
+      fontSize: "8px",
+      color,
+      stroke: "#1c1116",
+      strokeThickness: 2,
+    })
+      .setOrigin(0.5)
+      .setDepth(100000);
+
+    this.tweens.add({
+      targets: label,
+      y: y - 12,
+      alpha: 0,
+      duration: 600,
+      onComplete: () => label.destroy(),
+    });
   }
 
   /**
@@ -349,6 +500,16 @@ export class FarmScene extends Phaser.Scene {
     });
     this.fishingSystem.create();
 
+    // ── Combat ────────────────────────────────────────────────────────────
+    this._spawnPoint = { x: spawnX, y: spawnY };
+    this.projectileSystem = new ProjectileSystem(this);
+    this.enemySystem = new EnemySystem(this, {
+      onPlayerHit: (damage) => this._hurtPlayer(damage),
+      onEnemyKilled: (enemy) => this._rewardKill(enemy),
+    });
+    this.enemySystem.create();
+
+
     // ── Physics bounds ──────────────────────────────────��─────────────────
     this.physics.world.setBounds(0, 0, worldW, worldH);
     if (this.player.sprite.body) {
@@ -365,7 +526,28 @@ export class FarmScene extends Phaser.Scene {
     // ── Pointer interaction ───�����─────────────���������──────────────────────────────
     this._setupPointerInteraction();
 
+    // Debug handle so tooling can inspect live scene state.
+    (window as unknown as Record<string, unknown>).__farmScene = this;
+
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this._shutdown());
+  }
+
+  /** Debug/verification helpers. */
+  getCombatDebug() {
+    return {
+      enemies: this.enemySystem?.getEnemies().map((e) => ({
+        id: e.id, type: e.type, hp: e.hp, state: e.state,
+        x: Math.round(e.sprite.x), y: Math.round(e.sprite.y),
+      })) ?? [],
+      arrows: this.projectileSystem?.arrows.length ?? 0,
+      player: { x: Math.round(this.player.sprite.x), y: Math.round(this.player.sprite.y), facing: this.player.facing },
+    };
+  }
+
+  /** Teleports the player — debug only. */
+  debugTeleport(tileX: number, tileY: number) {
+    const ts = GAME_CONFIG.TILE_SIZE;
+    this.player.sprite.setPosition(tileX * ts + ts / 2, tileY * ts + ts / 2);
   }
 
   // ���─��� Pointer interaction ───────────────────────────────────────────���──────
@@ -768,6 +950,10 @@ export class FarmScene extends Phaser.Scene {
     this.farmingSystem = undefined;
     this.resourceSystem?.destroy();
     this.resourceSystem = undefined;
+    this.enemySystem?.destroy();
+    this.enemySystem = undefined;
+    this.projectileSystem?.destroy();
+    this.projectileSystem = undefined;
     this.worldSystem?.destroy();
     this.worldSystem = undefined;
     if (this._onPointerDown)  this.input.off("pointerdown", this._onPointerDown);
