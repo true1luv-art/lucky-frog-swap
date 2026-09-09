@@ -22,5 +22,7 @@ export const PlayerAssetLoader = {
     scene.load.spritesheet('player_reel',    `${SPR}/fishing_reeling_strip10.png`,  { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_damage',  `${SPR}/damage_strip8.png`,            { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_death',   `${SPR}/death_strip14.png`,            { frameWidth: FW, frameHeight: FH })
+    scene.load.spritesheet('player_bow',     `${SPR}/bow_strip6.png`,               { frameWidth: FW, frameHeight: FH })
+    scene.load.spritesheet('player_sword',   `${SPR}/sword_strip9.png`,             { frameWidth: FW, frameHeight: FH })
   },
 }
