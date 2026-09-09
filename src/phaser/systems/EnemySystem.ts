@@ -104,11 +104,15 @@ export class EnemySystem {
       enemy.drawHpBar();
     }
     this.paths.clear();
+    this.progress.clear();
+    this.detours.clear();
   }
 
   handleDeath(enemy: Enemy) {
     if (enemy.dying) return;
     this.paths.delete(enemy.id);
+    this.progress.delete(enemy.id);
+    this.detours.delete(enemy.id);
     enemy.dying = true;
     enemy.hpBar.clear();
     (enemy.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
@@ -365,6 +369,8 @@ export class EnemySystem {
     this.enemies = [];
     this.respawnAt.clear();
     this.paths.clear();
+    this.progress.clear();
+    this.detours.clear();
     this.enemyGroup?.clear(true, true);
   }
 }
