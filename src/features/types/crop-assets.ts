@@ -22,7 +22,7 @@ export const LIFECYCLE: Record<CropName, Lifecycle> = {
     almost:   "/assets/crops/cabbage/almost.png",
     ready:    "/assets/crops/cabbage/plant.png",
   },
-  },
+
   Wheat: {
     seedling: "/assets/crops/wheat/seedling.png",
     almost:   "/assets/crops/wheat/almost.png",
