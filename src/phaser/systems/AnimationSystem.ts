@@ -21,7 +21,7 @@ export class AnimationSystem {
   createPlayerAnimations() {
     PLAYER_ANIMS.forEach((config) => this._registerSafe(config))
     PLAYER_SUPPORT_ANIMS.forEach((config) => this._registerSafe(config))
-    CHARACTER_ANIMS.forEach((config) => this._registerSafe(config))
+    
   }
 
   createNpcAnimations() {
