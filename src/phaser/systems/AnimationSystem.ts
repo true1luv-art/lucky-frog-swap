@@ -41,6 +41,7 @@ export class AnimationSystem {
       frames:    this.scene.anims.generateFrameNumbers(tex, { start: 0, end: conf.frames - 1 }),
       frameRate: conf.frameRate,
       repeat:    conf.repeat,
+      skipMissedFrames: conf.skipMissedFrames,
     })
   }
 
