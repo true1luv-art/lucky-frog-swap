@@ -334,17 +334,29 @@ export class FarmScene extends Phaser.Scene {
     if (this._respawning) return;
     this._respawning = true;
 
+    // Stop movement and play the death strip before respawning.
+    (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
+    playDirectional(
+      this.player.sprite,
+      "player_death",
+      (this.player.facing ?? "down") as Facing,
+      false,
+    );
+
     const cam = this.cameras.main;
-    cam.fade(220, 0, 0, 0);
-    this.time.delayedCall(260, () => {
-      this.player.sprite.setPosition(this._spawnPoint.x, this._spawnPoint.y);
-      (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
-      this.enemySystem?.resetAll();
-      window.__gameStore?.getState?.()?.dispatch?.({ type: "player.died" });
-      dispatchUiEvent("phaser-player-died", {});
-      cam.fadeIn(220, 0, 0, 0);
-      this._invulnUntilMs = this.time.now + 2000;
-      this._respawning = false;
+    // death_strip14 @ 14 fps = ~1000 ms; let it finish before the fade.
+    this.time.delayedCall(1000, () => {
+      cam.fade(220, 0, 0, 0);
+      this.time.delayedCall(260, () => {
+        this.player.sprite.setPosition(this._spawnPoint.x, this._spawnPoint.y);
+        (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.setVelocity(0, 0);
+        this.enemySystem?.resetAll();
+        window.__gameStore?.getState?.()?.dispatch?.({ type: "player.died" });
+        dispatchUiEvent("phaser-player-died", {});
+        cam.fadeIn(220, 0, 0, 0);
+        this._invulnUntilMs = this.time.now + 2000;
+        this._respawning = false;
+      });
     });
   }
 
