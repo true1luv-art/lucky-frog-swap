@@ -23,6 +23,8 @@ type Win = Window & {
 export class InputSystem {
   /** Set when the player presses the attack key / taps the attack button. */
   attackRequested = false;
+  /** World-space point the mouse is aiming at, updated on move/click. */
+  aim: { x: number; y: number } | null = null;
   private scene:       Phaser.Scene;
   private speed:       number;
   private isMobile:    boolean;
@@ -52,6 +54,9 @@ export class InputSystem {
 
     // Attack: SPACE on desktop.
     scene.input.keyboard?.on("keydown-SPACE", this._onAttackKey);
+    // Mouse aiming: left click shoots toward the cursor.
+    scene.input.on("pointermove", this._onPointerMove);
+    scene.input.on("pointerdown", this._onPointerDown);
     // Mobile / React attack button bridge.
     if (typeof window !== "undefined") {
       window.addEventListener("phaser-attack", this._onAttackKey);
