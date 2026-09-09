@@ -1,8 +1,7 @@
 import type Phaser from 'phaser'
-import rancherAsset from '@/assets/npcs/rancher_strip9.png.asset.json'
-import traderAsset from '@/assets/npcs/trader_strip9.png.asset.json'
 
 const PLAYER_SPRITES = 'assets/phaser/sprites'
+const NPC_SPRITES = 'assets/npcs'
 
 /** Loads every NPC spritesheet used by the game and map editor. */
 export const NpcAssetLoader = {
@@ -11,16 +10,16 @@ export const NpcAssetLoader = {
       frameWidth: 96,
       frameHeight: 64,
     })
-    scene.load.spritesheet('npc_rancher', rancherAsset.url, {
+    scene.load.spritesheet('npc_rancher', `${NPC_SPRITES}/rancher_strip9.png`, {
       frameWidth: 96,
       frameHeight: 64,
     })
-    scene.load.spritesheet('npc_trader', traderAsset.url, {
+    scene.load.spritesheet('npc_trader', `${NPC_SPRITES}/trader_strip9.png`, {
       frameWidth: 96,
       frameHeight: 64,
     })
-    scene.load.spritesheet('npc_blacksmith', 'assets/npcs/blacksmith.png', {
-      frameWidth: 84,
+    scene.load.spritesheet('npc_blacksmith', `${NPC_SPRITES}/blacksmith_strip23.png`, {
+      frameWidth: 80,
       frameHeight: 56,
     })
   },
