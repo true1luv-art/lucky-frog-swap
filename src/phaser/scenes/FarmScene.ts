@@ -279,6 +279,9 @@ export class FarmScene extends Phaser.Scene {
         if (dist > HIT_RADIUS) continue;
 
         enemy.takeDamage(arrow.damage);
+        // Getting shot provokes the enemy: it hunts the player for a while
+        // even if the arrow came from outside its normal spot range.
+        enemy.provokedUntil = Date.now() + 8000;
         this.projectileSystem.kill(arrow);
         this._floatText(enemy.bodyX, enemy.bodyY - 26, `-${arrow.damage}`, "#ff6b6b");
 
