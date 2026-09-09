@@ -159,7 +159,7 @@ export class FarmScene extends Phaser.Scene {
     const currentBase   = animBase(currentAnim);
     const actionAnims   = [
       "player_mine", "player_axe", "player_doing", "player_shovel", "player_hammer",
-      "player_casting", "player_reeling", "player_caught", "player_bow",
+      "player_casting", "player_reeling", "player_caught", "player_bow", "player_damage",
     ];
     const playingAction =
       actionAnims.includes(currentBase) && this.player.sprite.anims?.isPlaying;
@@ -306,6 +306,12 @@ export class FarmScene extends Phaser.Scene {
     store?.dispatch?.({ type: "player.hurt", damage });
 
     this._floatText(this.player.sprite.x, this.player.sprite.y - 20, `-${damage}`, "#ff9494");
+    playDirectional(
+      this.player.sprite,
+      "player_damage",
+      (this.player.facing ?? "down") as Facing,
+      false,
+    );
     this.player.sprite.setTintFill(0xff4444);
     this.time.delayedCall(90, () => this.player.sprite?.clearTint());
     this.cameras.main.shake(90, 0.004);
