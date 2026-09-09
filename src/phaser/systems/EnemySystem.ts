@@ -316,6 +316,7 @@ export class EnemySystem {
     for (const enemy of this.enemies) enemy.destroy();
     this.enemies = [];
     this.respawnAt.clear();
+    this.paths.clear();
     this.enemyGroup?.clear(true, true);
   }
 }
