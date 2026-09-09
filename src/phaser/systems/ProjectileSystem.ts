@@ -2,7 +2,10 @@ import Phaser from "phaser";
 import { GAME_CONFIG } from "@/phaser/config/GameConfig";
 import type { BowStats } from "@/features/game/bow";
 
-const ARROW_TEXTURE = "combat_arrow";
+const ARROW_TEXTURE = "vfx_arrow";
+const ARROW_FALLBACK_TEXTURE = "combat_arrow";
+/** The sprite art points up, so rotate by +90° relative to travel angle. */
+const ARROW_ART_OFFSET = Math.PI / 2;
 const ARROW_SPEED = 320; // px/s
 
 export interface Arrow {
@@ -23,15 +26,19 @@ export class ProjectileSystem {
   arrows: Arrow[] = [];
   private scene: Phaser.Scene;
 
+  private texture: string;
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this._ensureTexture();
-    this.group = scene.physics.add.group({ defaultKey: ARROW_TEXTURE, allowGravity: false });
+    this.texture = scene.textures.exists(ARROW_TEXTURE) ? ARROW_TEXTURE : ARROW_FALLBACK_TEXTURE;
+    this.group = scene.physics.add.group({ defaultKey: this.texture, allowGravity: false });
   }
 
-  /** Draws a tiny pixel arrow once and caches it as a texture. */
+  /** Fallback: draws a tiny pixel arrow when the sprite sheet is missing. */
   private _ensureTexture() {
     if (this.scene.textures.exists(ARROW_TEXTURE)) return;
+    if (this.scene.textures.exists(ARROW_FALLBACK_TEXTURE)) return;
     const g = this.scene.add.graphics();
     g.fillStyle(0x6b4423, 1);
     g.fillRect(0, 3, 9, 2);      // shaft
@@ -40,7 +47,7 @@ export class ProjectileSystem {
     g.fillStyle(0xf2e6c9, 1);
     g.fillRect(0, 1, 2, 2);      // fletching
     g.fillRect(0, 5, 2, 2);
-    g.generateTexture(ARROW_TEXTURE, 13, 8);
+    g.generateTexture(ARROW_FALLBACK_TEXTURE, 13, 8);
     g.destroy();
   }
 
@@ -55,7 +62,7 @@ export class ProjectileSystem {
     stats: BowStats,
     angleRad?: number,
   ) {
-    const sprite = this.group.get(x, y, ARROW_TEXTURE) as Phaser.Physics.Arcade.Sprite | null;
+    const sprite = this.group.get(x, y, this.texture) as Phaser.Physics.Arcade.Sprite | null;
     if (!sprite) return;
 
     sprite.setActive(true).setVisible(true);
@@ -72,11 +79,14 @@ export class ProjectileSystem {
           }[facing]
         : { x: Math.cos(angleRad), y: Math.sin(angleRad) };
 
+    const usesSheet = this.texture === ARROW_TEXTURE;
     const body = sprite.body as Phaser.Physics.Arcade.Body | null;
     body?.setAllowGravity(false);
-    body?.setSize(10, 6);
+    body?.setSize(10, 10);
+    if (usesSheet) body?.setOffset((48 - 10) / 2, (48 - 10) / 2);
     sprite.setVelocity(dir.x * ARROW_SPEED, dir.y * ARROW_SPEED);
-    sprite.setRotation(Math.atan2(dir.y, dir.x));
+    sprite.setRotation(Math.atan2(dir.y, dir.x) + (usesSheet ? ARROW_ART_OFFSET : 0));
+    if (usesSheet) sprite.setFrame(0);
 
     this.arrows.push({
       sprite,
