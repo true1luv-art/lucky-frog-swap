@@ -43,6 +43,7 @@ import type {
   PlayerDiedAction,
   EnemyDefeatedAction,
   BowUpgradeAction,
+  BowEquipAction,
 } from "@/features/events/combat/combat";
 
 export type GameAction =

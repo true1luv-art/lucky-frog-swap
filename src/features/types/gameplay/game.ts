@@ -121,6 +121,8 @@ export type GameState = {
    * Upgraded with gold at the blacksmith.
    */
   bowTier?: BowTier;
+  /** Whether the bow is currently equipped (required to aim and shoot). */
+  bowEquipped?: boolean;
   fishing: FishingState;
   milestones: Milestones;
   /**
