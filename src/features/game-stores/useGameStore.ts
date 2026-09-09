@@ -500,6 +500,20 @@ export const useGameStore = create<FarmStore>()(
         try {
           const raw = JSON.stringify((persisted as { state: unknown }).state);
           const restored = JSON.parse(raw, decimalReviver) as GameState;
+          // Older saves predate the Bow tool — grant it so it shows in Tools.
+          const tools = restored.tools ?? [];
+          if (!tools.some((t) => t.name === "Bow")) {
+            restored.tools = [
+              ...tools,
+              {
+                id: "bow-wood-default",
+                name: "Bow",
+                tier: (restored.bowTier as ToolTier) ?? "Wood",
+                durability: null,
+                maxDurability: null,
+              },
+            ];
+          }
           return { ...current, state: restored };
         } catch {
           return current;
