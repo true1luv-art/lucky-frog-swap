@@ -40,8 +40,8 @@ export const NPC_POSITIONS: NpcPositionDef[] = [
   },
   {
     id: 'npc_blacksmith',
-    x: 36,
-    y: 8,
+    x: 35.4375,
+    y: 3,
     width: 2,
     height: 2,
     facing: 'right',
