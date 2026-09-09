@@ -58,6 +58,8 @@ export class EnemySystem {
   private enemies: Enemy[] = [];
   /** spawn point id → epoch ms when it may spawn again */
   private respawnAt = new Map<string, number>();
+  /** enemy id → cached A* route while chasing */
+  private paths = new Map<string, ChasePath>();
 
   constructor(scene: Phaser.Scene, opts: EnemySystemOptions) {
     this.scene = scene;
@@ -229,6 +231,33 @@ export class EnemySystem {
    * Keeps enemies from stacking into a single sprite when several chase the
    * player, so each one stays individually readable and hittable.
    */
+  /**
+   * Where a chasing enemy should head this frame: straight at the player when
+   * it has a clear line, otherwise the next waypoint of an A* route around
+   * whatever is in the way.
+   */
+  private chaseStep(
+    enemy: Enemy, ex: number, ey: number, px: number, py: number, now: number,
+  ): { x: number; y: number } {
+    const isBlocked = this.opts.isTileBlocked;
+    if (!isBlocked) return { x: px, y: py };
+
+    const from = toTile(ex, ey);
+    const to = toTile(px, py);
+    if (hasLineOfSight(from, to, isBlocked)) {
+      this.paths.delete(enemy.id);
+      return { x: px, y: py };
+    }
+
+    let path = this.paths.get(enemy.id);
+    if (!path || now >= path.repathAt || path.tiles.length === 0) {
+      path = { tiles: findPath(from, to, { isBlocked }), repathAt: now + REPATH_INTERVAL_MS };
+      this.paths.set(enemy.id, path);
+    }
+
+    return nextWaypoint(path.tiles, ex, ey) ?? { x: px, y: py };
+  }
+
   private separate() {
     const living = this.enemies.filter((e) => !e.dying);
     for (let i = 0; i < living.length; i++) {
