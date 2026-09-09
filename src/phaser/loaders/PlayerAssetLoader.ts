@@ -15,6 +15,7 @@ export const PlayerAssetLoader = {
     scene.load.spritesheet('player_axe',     `${SPR}/axe_strip10.png`,              { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_doing',   `${SPR}/hoe_strip18.png`,              { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_shovel',  `${SPR}/shovel_strip13.png`,           { frameWidth: FW, frameHeight: FH })
+    scene.load.spritesheet('player_hammer',  `${SPR}/hammer_strip20.png`,           { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_casting', `${SPR}/fishing_casting_strip15.png`,  { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_caught',  `${SPR}/fishing_catching_strip10.png`, { frameWidth: FW, frameHeight: FH })
     scene.load.spritesheet('player_fishidle',`${SPR}/fishing_idle_strip10.png`,     { frameWidth: FW, frameHeight: FH })

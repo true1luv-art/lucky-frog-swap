@@ -26,15 +26,16 @@ export const PLAYER_SUPPORT_ANIMS: AnimationDefinition[] = [
   { key: 'player_waiting', texture: 'player_fishidle', frames: 10, frameRate: 10, repeat: -1 },
   { key: 'player_reeling', texture: 'player_reel',     frames: 10, frameRate: 10, repeat: 0 },
   { key: 'player_shovel',  texture: 'player_shovel',   frames: 13, frameRate: 13, repeat: 0 },
+  { key: 'player_hammer',  texture: 'player_hammer',   frames: 20, frameRate: 20, repeat: 0 },
   { key: 'player_damage',  texture: 'player_damage',   frames: 8,  frameRate: 8,  repeat: 0 },
   { key: 'player_death',   texture: 'player_death',    frames: 14, frameRate: 14, repeat: 0 },
 ]
 
 export const NPC_ANIMS: AnimationDefinition[] = [
   { key: 'npc_idle', texture: 'npc_base', frames: 6, frameRate: 6, repeat: -1 },
-  { key: 'npc_rancher_idle', texture: 'npc_rancher', frames: 9, frameRate: 9, repeat: -1 },
-  { key: 'npc_trader_idle', texture: 'npc_trader', frames: 9, frameRate: 9, repeat: -1 },
-  { key: 'npc_blacksmith_idle', texture: 'npc_blacksmith', frames: 23, frameRate: 23, repeat: -1 },
+  { key: 'npc_rancher_idle', texture: 'npc_rancher', frames: 6, frameRate: 6, repeat: -1 },
+  { key: 'npc_trader_idle', texture: 'npc_trader', frames: 6, frameRate: 6, repeat: -1 },
+  { key: 'npc_blacksmith_idle', texture: 'npc_blacksmith', frames: 20, frameRate: 20, repeat: -1 },
 ]
 
 export const ANIMAL_ANIMS: AnimationDefinition[] = [
