@@ -1,0 +1,336 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes grow {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.animate-grow-bar {
+  animation: grow 3s linear forwards;
+}
+
+@keyframes float-up {
+  0%   { opacity: 1; transform: translateY(0);    }
+  80%  { opacity: 1; transform: translateY(-24px); }
+  100% { opacity: 0; transform: translateY(-32px); }
+}
+
+.animate-bounce-once {
+  animation: float-up 1.2s ease-out forwards;
+}
+
+@layer base {
+  :root {
+    --background: 40 33% 96%;
+    --foreground: 20 14% 10%;
+    --card: 40 33% 96%;
+    --card-foreground: 20 14% 10%;
+    --primary: 24 70% 45%;
+    --primary-foreground: 40 33% 96%;
+    --secondary: 35 60% 85%;
+    --secondary-foreground: 20 14% 10%;
+    --muted: 35 20% 90%;
+    --muted-foreground: 20 14% 40%;
+    --accent: 140 50% 40%;
+    --accent-foreground: 40 33% 96%;
+    --border: 35 20% 85%;
+    --ring: 24 70% 45%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  /* Inside the game route the pixel Panel/Box/Tab components use border-image.
+     A solid border-color from --border bleeds through the image seams and breaks
+     the pixel frames. Reset to transparent so only border-image renders. */
+  [data-game-route] * {
+    border-color: transparent;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  /* Single-pixel drop shadow */
+  .text-shadow {
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  /* Medium drop shadow */
+  .text-shadow-md {
+    text-shadow: 2px 2px 0 #000;
+  }
+
+  .text-shadow-none {
+    text-shadow: none;
+  }
+
+  /*
+   * Pixel-art style text outline: 8-directional 1 px black stroke.
+   * Use on all HUD text that sits over the game canvas.
+   */
+  .text-outline {
+    text-shadow:
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000,
+       0px -1px 0 #000,
+       0px  1px 0 #000,
+      -1px  0px 0 #000,
+       1px  0px 0 #000;
+  }
+
+  /* Stronger 2 px outline for larger / title-level HUD text */
+  .text-outline-lg {
+    text-shadow:
+      -2px -2px 0 #000,
+       2px -2px 0 #000,
+      -2px  2px 0 #000,
+       2px  2px 0 #000,
+       0px -2px 0 #000,
+       0px  2px 0 #000,
+      -2px  0px 0 #000,
+       2px  0px 0 #000,
+       0px -1px 0 #000,
+       0px  1px 0 #000;
+  }
+
+  .img-highlight {
+    filter: drop-shadow(1px 1px 0px white) drop-shadow(-1px 0px 0px white)
+      drop-shadow(0px -1px 0px white);
+  }
+
+  .collectible-forged-panel {
+    box-shadow: inset 0 0 0 1px rgb(245 196 81 / 45%);
+  }
+}
+
+/* Game-specific styles - only apply in game context */
+.game-context {
+  font-family: var(--font-press-start), "Press Start 2p", sans-serif;
+  text-shadow: 1px 1px black;
+  font-size: 12px;
+}
+
+@media screen and (min-width: 480px) {
+  .game-context {
+    font-size: 16px;
+  }
+}
+
+/* Disable text selection inside the game canvas only */
+[data-game-route] * {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Disable html number input arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/*
+  Override React Bootstrap styles that don't play nicely.
+  These rules only apply if/where react-bootstrap is still used.
+*/
+.modal-content {
+  background: transparent;
+  border: none;
+}
+
+.modal-dialog-scrollable .modal-content {
+  overflow: initial;
+}
+
+/* ModalShell size tiers — docs/modal-redesign-plan.md §2.1 */
+.modal-shell-toast {
+  max-width: 360px;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-shell-panel {
+  max-width: min(92vw, 720px);
+  width: min(92vw, 720px);
+}
+
+.modal-shell-fullscreen {
+  margin: 0;
+  max-width: none;
+  width: 100vw;
+  height: 100dvh;
+}
+
+.modal-shell-fullscreen .modal-content {
+  height: 100%;
+}
+
+/* FishCaughtModal auto-close countdown bar (docs/modal-redesign-plan.md §2.5) */
+@keyframes fish-caught-countdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.fish-caught-countdown {
+  animation-name: fish-caught-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.carousel-control-next,
+.carousel-control-prev {
+  opacity: 1;
+}
+
+.carousel-indicators {
+  bottom: -42px;
+}
+
+.accordion-button {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Assets are served from /public, so they are referenced from the site root. */
+.accordion-button::after {
+  background-image: url("/assets/icons/indicator.png") !important;
+}
+
+img,
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2.4s linear infinite;
+}
+
+@keyframes floating {
+  from {
+    transform: translate(0, 0px);
+  }
+  65% {
+    transform: translate(0, 10px);
+  }
+  to {
+    transform: translate(0, -0px);
+  }
+}
+
+@keyframes marquee-like-effect {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes ellipsis {
+  to {
+    transform: translateY(-6em);
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.two-line-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Loading ellipsis animation that will be added to the end of text ie Loading... */
+.loading {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.5rem;
+  line-height: 1.5em;
+  vertical-align: text-bottom;
+}
+
+.loading::after {
+  display: inline-table;
+  white-space: pre;
+  text-align: left;
+  content: "\A.\A..\A...";
+  animation: ellipsis 1s steps(4) infinite;
+}
+
+.npc-shadow::after {
+  content: "";
+  height: 14px;
+  width: 28px;
+  border-radius: 50%;
+  background: #32323273;
+  position: absolute;
+  z-index: 0;
+  bottom: -43px;
+  left: 7px;
+}
+
+/* Custom scrollbar for item modal */
+.scrollable::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+  border-radius: 5px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  border: 2px solid black;
+  background-color: #eea368;
+}

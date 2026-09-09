@@ -1,0 +1,7 @@
+# Robinhood Farm
+
+> Robinhood Farm ($HFARM) is a stamina-driven farming RPG on Robinhood Chain: grow crops, gather resources, cook, trade, and complete quests to earn HFARM.
+
+## Pages
+
+- [Home](/): Gameplay overview, tokenomics, how to buy $HFARM, and the leaderboard.

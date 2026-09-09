@@ -1,0 +1,7 @@
+# Lucky Frog
+
+> Lucky Frog ($LFRG) is a Solana meme coin: a crowned frog bringing good vibes, lucky trades, and legendary memes to the swamp.
+
+## Pages
+
+- [Home](/): Lore, tokenomics, how to buy $LFRG, and the meme gallery.

@@ -1,0 +1,8 @@
+export { PLOT_POSITIONS }                                                             from '@/phaser/positions/plotPositions'
+export { TREE_POSITIONS }                                                             from '@/phaser/positions/treePositions'
+export { STONE_POSITIONS, IRON_POSITIONS, GOLD_POSITIONS }                           from '@/phaser/positions/stonePositions'
+export { BUILDING_KEYS, BUILDING_POSITIONS }                                          from '@/phaser/positions/buildingPositions'
+export type { BuildingKey }                                                           from '@/phaser/positions/buildingPositions'
+export { NPC_POSITIONS }                                                              from '@/phaser/positions/npcs'
+export { BARN_ZONE, CHICKEN_SPAWN_POSITIONS, COW_SPAWN_POSITIONS, SHEEP_SPAWN_POSITIONS } from '@/phaser/positions/barnPositions'
+export { FISHING_POSITIONS }                                                          from '@/phaser/positions/fishingPositions'
