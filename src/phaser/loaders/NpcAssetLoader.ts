@@ -19,10 +19,8 @@ export const NpcAssetLoader = {
       frameHeight: 64,
     })
     scene.load.spritesheet('npc_blacksmith', `${NPC_SPRITES}/blacksmith_strip23.png`, {
-      // The filename is misleading: the source is 1920px wide and contains
-      // 24 native 80x56 frames. Slicing it as 23 frames makes every frame drift.
-      frameWidth: 80,
-      frameHeight: 56,
+      frameWidth: 96,
+      frameHeight: 64,
     })
   },
 }
