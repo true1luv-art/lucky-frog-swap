@@ -1,7 +1,7 @@
 /**
  * shared/game/crops.ts
  *
- * Isomorphic crop configuration — 5 crops only.
+ * Isomorphic crop configuration — 4 crops only.
  * Beetroot, Parsnip, Radish, Cauliflower and Kale are fully abolished.
  * Wheat is now a purchasable crop (seeded with Wood + Stone).
  */
@@ -10,7 +10,6 @@ export type CropName =
   | "Potato"
   | "Carrot"
   | "Cabbage"
-  | "Pumpkin"
   | "Wheat";
 
 export type SeedName = `${CropName} Seed`;
@@ -41,12 +40,6 @@ export const CROPS_CONFIG: Record<CropName, CropConfig> = {
     farmingLevelRequired: 2,
     description: "Leafy and fresh.",
   },
-  Pumpkin: {
-    name: "Pumpkin",
-    harvestSeconds: 30 * 60,
-    farmingLevelRequired: 3,
-    description: "Big and orange.",
-  },
   Wheat: {
     name: "Wheat",
     harvestSeconds: 12 * 60 * 60,
@@ -55,7 +48,7 @@ export const CROPS_CONFIG: Record<CropName, CropConfig> = {
   },
 };
 
-/** All 5 crops are purchasable — none are quest-gated. */
+/** All 4 crops are purchasable — none are quest-gated. */
 export function isQuestSeed(_crop: CropName): boolean {
   return false;
 }

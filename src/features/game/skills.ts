@@ -66,7 +66,6 @@ export const SKILL_XP = {
   harvest_potato:   3,   // 1 min  — 12 960/day → 14.8 days solo; mix lands ~7 days
   harvest_carrot:   20,  // 5 min
   harvest_cabbage:  50,  // 10 min
-  harvest_pumpkin:  140, // 30 min
   harvest_wheat:    500, // 12 hr  — endgame crop
 
   // Woodcutting — 2 400 chops/day → 9.6 days
@@ -88,9 +87,7 @@ export const SKILL_XP = {
   cook_cooked_fish:    35,
   cook_cabbage_roll:   80,
   cook_carrot_stew:    80,
-  cook_pumpkin_soup:   120,
   cook_scrambled_eggs: 120,
-  cook_pumpkin_pie:    200,
   cook_wheat_bread:    300,
 
   // Farming — watering a field

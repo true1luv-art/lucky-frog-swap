@@ -33,7 +33,6 @@ const seeds = SEEDS();
 // They are excluded from ITEM_DETAILS which only covers InventoryItemName entries.
 export const ITEM_DETAILS: ItemDetailsMap = {
   Potato:  { ...crops.Potato,  image: "/assets/crops/potato/crop.png" },
-  Pumpkin: { ...crops.Pumpkin, image: "/assets/crops/pumpkin/crop.png" },
   Carrot:  { ...crops.Carrot,  image: "/assets/crops/carrot/crop.png" },
   Cabbage: { ...crops.Cabbage, image: "/assets/crops/cabbage/crop.png" },
   Wheat:   { ...crops.Wheat,   image: "/assets/crops/wheat/crop.png" },
@@ -41,7 +40,6 @@ export const ITEM_DETAILS: ItemDetailsMap = {
   "Potato Seed":  { ...seeds["Potato Seed"],  image: "/assets/crops/potato/seed.png",  secondaryImage: "/assets/crops/potato/crop.png" },
   "Carrot Seed":  { ...seeds["Carrot Seed"],  image: "/assets/crops/carrot/seed.png",  secondaryImage: "/assets/crops/carrot/crop.png" },
   "Cabbage Seed": { ...seeds["Cabbage Seed"], image: "/assets/crops/cabbage/seed.png", secondaryImage: "/assets/crops/cabbage/crop.png" },
-  "Pumpkin Seed": { ...seeds["Pumpkin Seed"], image: "/assets/crops/pumpkin/seed.png", secondaryImage: "/assets/crops/pumpkin/crop.png" },
   "Wheat Seed":   { ...seeds["Wheat Seed"],   image: "/assets/crops/wheat/seed.png",   secondaryImage: "/assets/crops/wheat/crop.png" },
 
   Wood:     { ...RESOURCES["Wood"],     image: "/assets/resources/wood.png" },
@@ -69,10 +67,8 @@ export const ITEM_DETAILS: ItemDetailsMap = {
   "Cooked Fish":     { ...FOODS()["Cooked Fish"],     image: "/assets/foods/cooked_fish.png" },
   "Cabbage Roll":    { ...FOODS()["Cabbage Roll"],    image: "/assets/foods/cabbage_roll.png" },
   "Carrot Stew":     { ...FOODS()["Carrot Stew"],     image: "/assets/foods/carrot_stew.png" },
-  "Pumpkin Soup":    { ...FOODS()["Pumpkin Soup"],    image: "/assets/foods/pumpkin_soup.png" },
   "Scrambled Eggs":  { ...FOODS()["Scrambled Eggs"],  image: "/assets/foods/scrambled_eggs.png" },
   "Wheat Bread":     { ...FOODS()["Wheat Bread"],     image: "/assets/foods/wheat_bread.png" },
-  "Pumpkin Pie":     { ...FOODS()["Pumpkin Pie"],     image: "/assets/foods/pumpkin_pie.png" },
 
   ...fishEntries,
 

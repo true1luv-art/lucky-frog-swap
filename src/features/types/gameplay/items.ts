@@ -11,7 +11,7 @@ export type ItemType =
   | "resource"   // Wood, Stone, Coal
   | "ore"        // Iron, Silver, Emerald, Diamond, Ignisite
   | "ingot"      // Iron Ingot … Ignisite Ingot
-  | "crop"       // Potato, Carrot, Cabbage, Pumpkin, Wheat
+  | "crop"       // Potato, Carrot, Cabbage, Wheat
   | "seed"       // Potato Seed … Wheat Seed
   | "food"       // Baked Potato, Cooked Fish, Carrot Stew, …
   | "fish"       // Fish
@@ -45,14 +45,12 @@ export const ITEM_TYPE: Record<string, ItemType> = {
   Potato:           "crop",
   Carrot:           "crop",
   Cabbage:          "crop",
-  Pumpkin:          "crop",
   Wheat:            "crop",
 
   // Seeds
   "Potato Seed":    "seed",
   "Carrot Seed":    "seed",
   "Cabbage Seed":   "seed",
-  "Pumpkin Seed":   "seed",
   "Wheat Seed":     "seed",
 
   // Food
@@ -60,10 +58,8 @@ export const ITEM_TYPE: Record<string, ItemType> = {
   "Cooked Fish":    "food",
   "Cabbage Roll":   "food",
   "Carrot Stew":    "food",
-  "Pumpkin Soup":   "food",
   "Scrambled Eggs": "food",
   "Wheat Bread":    "food",
-  "Pumpkin Pie":    "food",
 
   // Fish
   Fish:             "fish",

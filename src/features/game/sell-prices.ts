@@ -19,7 +19,6 @@ export const CROP_SELL_PRICES: Record<CropName, number> = {
   Potato:  2,
   Carrot:  5,
   Cabbage: 8,
-  Pumpkin: 15,
   Wheat:   20,
 };
 
@@ -28,15 +27,14 @@ export const FOOD_SELL_PRICES: Record<Food, number> = {
   "Cooked Fish":    6,
   "Cabbage Roll":   20,
   "Carrot Stew":    18,
-  "Pumpkin Soup":   30,
   "Scrambled Eggs": 25,
   "Wheat Bread":    40,
-  "Pumpkin Pie":    50,
 };
 
 export const RESOURCE_SELL_PRICES: Partial<Record<ResourceName, number>> = {
-  Wood:  3,
-  Stone: 4,
+  // Wood and Stone are NOT sellable — they are seed/craft inputs only.
+  Wood:  0,
+  Stone: 0,
 };
 
 /** Fish sell prices per fish name. */
